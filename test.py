@@ -102,4 +102,11 @@ precios_bmks_yahoo_df.reset_index(inplace=True)
 precios_bmks_yahoo_df.rename(columns={"Date":"Fecha", "^MXX":"IPC", "^SPESG":"SPESG_USD", "^SPGSCI":"SPGSCI_USD"}, inplace=True)
 precios_bmks_yahoo_df["Fecha"] = pd.to_datetime(precios_bmks_yahoo_df["Fecha"])
 
+spot_df = pd.read_csv("./ArchivosRendimientos/Benchmarks/Historico_SPOT.csv")
+spot_df.rename(columns={"FECHA":"Fecha", "PRECIO SUCIO":"Spot"}, inplace=True)
+spot_df = spot_df[["Fecha", "Spot"]]
+spot_df["Fecha"] = pd.to_datetime(spot_df["Fecha"])
+
+precios_bmks_yahoo_df = pd.merge(precios_bmks_yahoo_df, spot_df, on="Fecha", how="left")
+
 st.write(precios_bmks_yahoo_df)
