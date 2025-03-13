@@ -109,4 +109,4 @@ spot_df["Fecha"] = pd.to_datetime(spot_df["Fecha"])
 
 precios_bmks_yahoo_df = pd.merge(precios_bmks_yahoo_df, spot_df, on="Fecha", how="left")
 
-st.write(precios_bmks_yahoo_df)
+st.write(precios_bmks_yahoo_df.dtypes)
