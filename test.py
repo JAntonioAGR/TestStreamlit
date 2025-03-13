@@ -108,6 +108,7 @@ spot_df = spot_df[["Fecha", "Spot"]]
 spot_df["Fecha"] = pd.to_datetime(spot_df["Fecha"])
 
 precios_bmks_yahoo_df = pd.merge(precios_bmks_yahoo_df, spot_df, on="Fecha", how="left")
-precios_bmks_yahoo_df[["SPESG", "SPGSCI"]] = precios_bmks_yahoo_df[["SPESG_USD", "SPGSCI_USD"]] * precios_bmks_yahoo_df["Spot"]
+precios_bmks_yahoo_df["SPESG"] = precios_bmks_yahoo_df["SPESG_USD"] * precios_bmks_yahoo_df["Spot"]
+precios_bmks_yahoo_df["SPGSCI"] = precios_bmks_yahoo_df["SPGSCI_USD"] * precios_bmks_yahoo_df["Spot"]
 
 st.write(precios_bmks_yahoo_df)
