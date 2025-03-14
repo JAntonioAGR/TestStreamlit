@@ -6,6 +6,47 @@ import pandas as pd
 fecha = datetime.today()
 fecha = datetime(year=fecha.year, month=fecha.month, day=fecha.day)
 
+def formatea_precios_yahoo(bmks_rv):
+    precios_bmks_yahoo_df = yf.download(bmks_rv, start=datetime(year=fecha.year - 1, month=1, day=1).strftime("%Y-%m-%d"))
+    precios_bmks_yahoo_df = precios_bmks_yahoo_df.xs(key="Close", axis=1, level=0)
+    precios_bmks_yahoo_df.reset_index(inplace=True)
+    precios_bmks_yahoo_df.rename(columns={"Date":"Fecha", "^MXX":"IPC", "^SPESG":"SPESG_USD", "^SPGSCI":"SPGSCI_USD", "^GSPC":"S&P_USD", "^NDX":"NDX_USD"}, inplace=True)
+    precios_bmks_yahoo_df["Fecha"] = pd.to_datetime(precios_bmks_yahoo_df["Fecha"])
+
+    return precios_bmks_yahoo_df
+
+def formatea_precios_spot():
+    spot_df = pd.read_csv("./ArchivosRendimientos/Benchmarks/Historico_SPOT.csv")
+    spot_df.rename(columns={"FECHA":"Fecha", "PRECIO SUCIO":"Spot"}, inplace=True)
+    spot_df = spot_df[["Fecha", "Spot"]]
+    spot_df["Fecha"] = pd.to_datetime(spot_df["Fecha"])
+
+    return spot_df
+
+def formatea_precios_isimp():
+    precios_bmks_isimp_df = pd.read_excel("./ArchivosPeergroups/Benchmarks/Historico_ISIMP.xlsx", skiprows=2, skipfooter=4)
+    precios_bmks_isimp_df["Fecha"] = pd.to_datetime(precios_bmks_isimp_df["Fecha"], format="%d/%m/%Y")
+    precios_bmks_isimp_df.rename(columns={"Índice":"ISIMP"}, inplace=True)
+    precios_bmks_isimp_df = precios_bmks_isimp_df[["Fecha", "ISIMP"]]
+
+    return precios_bmks_isimp_df
+
+def formatea_precios_acwi():
+    precios_bmks_acwi_df = pd.read_csv("./ArchivosPeergroups/Benchmarks/Historico_ACWI.csv")
+    precios_bmks_acwi_df.rename(columns={"FECHA":"Fecha", "PRECIO SUCIO":"ACWI"}, inplace=True)
+    precios_bmks_acwi_df["Fecha"] = pd.to_datetime(precios_bmks_acwi_df["Fecha"], format="%Y-%m-%d")
+    precios_bmks_acwi_df = precios_bmks_acwi_df[["Fecha", "ACWI"]]
+
+    return precios_bmks_acwi_df
+
+def formatea_precios_bmks_valmer():
+    precios_bmks_valmer_df = pd.read_csv("./ArchivosPeergroups/Benchmarks/Benchmarks_SP_Historico_MD.csv")
+    precios_bmks_valmer_df.rename(columns={"FECHA":"Fecha"}, inplace=True)
+    precios_bmks_valmer_df["Fecha"] = pd.to_datetime(precios_bmks_valmer_df["Fecha"], format="%Y%m%d")
+    precios_bmks_valmer_df.drop(columns=[col for col in precios_bmks_valmer_df.columns if "Unnamed" in col], inplace=True)
+
+    return precios_bmks_valmer_df
+
 fondo2benchmark = {
     "VECTUSA":{
         "Benchmarks":[
@@ -140,16 +181,9 @@ fondo2benchmark = {
 
 bmks_rv = ["^MXX", "^SPESG", "^SPGSCI", "^GSPC", "^NDX"]
 
-precios_bmks_yahoo_df = yf.download(bmks_rv, start=datetime(year=fecha.year - 1, month=1, day=1).strftime("%Y-%m-%d"))
-precios_bmks_yahoo_df = precios_bmks_yahoo_df.xs(key="Close", axis=1, level=0)
-precios_bmks_yahoo_df.reset_index(inplace=True)
-precios_bmks_yahoo_df.rename(columns={"Date":"Fecha", "^MXX":"IPC", "^SPESG":"SPESG_USD", "^SPGSCI":"SPGSCI_USD", "^GSPC":"S&P_USD", "^NDX":"NDX_USD"}, inplace=True)
-precios_bmks_yahoo_df["Fecha"] = pd.to_datetime(precios_bmks_yahoo_df["Fecha"])
+spot_df = formatea_precios_spot()
 
-spot_df = pd.read_csv("./ArchivosRendimientos/Benchmarks/Historico_SPOT.csv")
-spot_df.rename(columns={"FECHA":"Fecha", "PRECIO SUCIO":"Spot"}, inplace=True)
-spot_df = spot_df[["Fecha", "Spot"]]
-spot_df["Fecha"] = pd.to_datetime(spot_df["Fecha"])
+precios_bmks_yahoo_df = formatea_precios_yahoo(bmks_rv)
 
 precios_bmks_df = pd.merge(precios_bmks_yahoo_df, spot_df, on="Fecha", how="left")
 precios_bmks_df["SPESG"] = precios_bmks_df["SPESG_USD"] * precios_bmks_df["Spot"]
@@ -158,27 +192,19 @@ precios_bmks_df["S&P"] = precios_bmks_df["S&P_USD"] * precios_bmks_df["Spot"]
 precios_bmks_df["NDX"] = precios_bmks_df["NDX_USD"] * precios_bmks_df["Spot"]
 precios_bmks_df.drop(columns=["SPESG_USD", "SPGSCI_USD", "S&P_USD", "NDX_USD"], inplace=True)
 
-precios_bmks_isimp_df = pd.read_excel("./ArchivosPeergroups/Benchmarks/Historico_ISIMP.xlsx", skiprows=2, skipfooter=4)
-precios_bmks_isimp_df["Fecha"] = pd.to_datetime(precios_bmks_isimp_df["Fecha"], format="%d/%m/%Y")
-precios_bmks_isimp_df.rename(columns={"Índice":"ISIMP"}, inplace=True)
-precios_bmks_isimp_df = precios_bmks_isimp_df[["Fecha", "ISIMP"]]
+precios_bmks_isimp_df = formatea_precios_isimp()
 
 precios_bmks_df = pd.merge(precios_bmks_df, precios_bmks_isimp_df, on="Fecha", how="left")
 
-precios_bmks_acwi_df = pd.read_csv("./ArchivosPeergroups/Benchmarks/Historico_ACWI.csv")
-precios_bmks_acwi_df.rename(columns={"FECHA":"Fecha", "PRECIO SUCIO":"ACWI"}, inplace=True)
-precios_bmks_acwi_df["Fecha"] = pd.to_datetime(precios_bmks_acwi_df["Fecha"], format="%Y-%m-%d")
-precios_bmks_acwi_df = precios_bmks_acwi_df[["Fecha", "ACWI"]]
+precios_bmks_acwi_df = formatea_precios_acwi()
 
 precios_bmks_df = pd.merge(precios_bmks_df, precios_bmks_acwi_df, on="Fecha", how="left")
 
-precios_bmks_valmer_df = pd.read_csv("./ArchivosPeergroups/Benchmarks/Benchmarks_SP_Historico_MD.csv")
-precios_bmks_valmer_df.rename(columns={"FECHA":"Fecha"}, inplace=True)
-precios_bmks_valmer_df["Fecha"] = pd.to_datetime(precios_bmks_valmer_df["Fecha"], format="%Y%m%d")
-precios_bmks_valmer_df.drop(columns=[col for col in precios_bmks_valmer_df.columns if "Unnamed" in col], inplace=True)
+precios_bmks_valmer_df = formatea_precios_bmks_valmer()
 
 precios_bmks_df = pd.merge(precios_bmks_df, precios_bmks_valmer_df, on="Fecha", how="left")
 
-
+# for fondo in fondo2benchmark.keys():
+#     rendimientos_df = 
 
 st.write(precios_bmks_df)
