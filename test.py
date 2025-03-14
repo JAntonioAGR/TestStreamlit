@@ -64,6 +64,7 @@ def formatea_precios_bmks():
     precios_bmks_df = pd.merge(precios_bmks_df, precios_bmks_acwi_df, on="Fecha", how="left")
     precios_bmks_valmer_df = formatea_precios_bmks_valmer()
     precios_bmks_df = pd.merge(precios_bmks_df, precios_bmks_valmer_df, on="Fecha", how="left")
+    precios_bmks_df.set_index("Fecha", inplace=True)
 
     return precios_bmks_df
 
@@ -297,7 +298,21 @@ fechas_habiles_iniciales_rv = calcula_fechas_habiles_iniciales(fechas_exactas_in
 
 precios_bmks_df = formatea_precios_bmks()
 
-# for fondo in fondo2benchmark.keys():
-#     rendimientos_df = 
+rendimientos_bmks_df = pd.DataFrame()
+for ventana in fechas_habiles_iniciales_rv.keys():
+    rendimientos_bmk_ventana = []
+    for fondo in fondo2benchmark.keys():
+        fecha_inicial = fechas_habiles_iniciales_rv[ventana]
+        fecha_final = (fecha - bmv_offset).to_pydatetime()
 
-st.write(fechas_habiles_iniciales_rv)
+        bmks = fondo2benchmark[fondo]["Benchmarks"]
+        pesos = fondo2benchmark[fondo]["Pesos"]
+        rendimiento_bmk = ((rendimientos_bmks_df[bmks].loc[fecha_final]/rendimientos_bmks_df[bmks].loc[fecha_inicial] - 1) * pesos).sum()
+
+        rendimientos_bmk_ventana.append(rendimiento_bmk)
+
+    rendimientos_bmk_ventana_df = pd.DataFrame({ventana:rendimientos_bmk_ventana}, index=fondo2benchmark.keys())
+    rendimientos_bmks_df = pd.concat([rendimientos_bmks_df, rendimientos_bmk_ventana_df], axis=1)
+
+
+st.write(rendimientos_bmks_df)
