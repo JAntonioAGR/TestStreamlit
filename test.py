@@ -254,7 +254,7 @@ fondo2benchmark = {
     },
     "VECTMIX":{
         "Benchmarks":[
-            "S&P500", "IPC"
+            "S&P", "IPC"
         ],
         "Pesos":[0.5, 0.5]
     },
