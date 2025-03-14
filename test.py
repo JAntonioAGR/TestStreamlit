@@ -47,6 +47,24 @@ def formatea_precios_bmks_valmer():
 
     return precios_bmks_valmer_df
 
+def formatea_precios_bmks():
+    spot_df = formatea_precios_spot()
+    precios_bmks_yahoo_df = formatea_precios_yahoo(bmks_rv)
+    precios_bmks_df = pd.merge(precios_bmks_yahoo_df, spot_df, on="Fecha", how="left")
+    precios_bmks_df["SPESG"] = precios_bmks_df["SPESG_USD"] * precios_bmks_df["Spot"]
+    precios_bmks_df["SPGSCI"] = precios_bmks_df["SPGSCI_USD"] * precios_bmks_df["Spot"]
+    precios_bmks_df["S&P"] = precios_bmks_df["S&P_USD"] * precios_bmks_df["Spot"]
+    precios_bmks_df["NDX"] = precios_bmks_df["NDX_USD"] * precios_bmks_df["Spot"]
+    precios_bmks_df.drop(columns=["SPESG_USD", "SPGSCI_USD", "S&P_USD", "NDX_USD"], inplace=True)
+    precios_bmks_isimp_df = formatea_precios_isimp()
+    precios_bmks_df = pd.merge(precios_bmks_df, precios_bmks_isimp_df, on="Fecha", how="left")
+    precios_bmks_acwi_df = formatea_precios_acwi()
+    precios_bmks_df = pd.merge(precios_bmks_df, precios_bmks_acwi_df, on="Fecha", how="left")
+    precios_bmks_valmer_df = formatea_precios_bmks_valmer()
+    precios_bmks_df = pd.merge(precios_bmks_df, precios_bmks_valmer_df, on="Fecha", how="left")
+
+    return precios_bmks_df
+
 fondo2benchmark = {
     "VECTUSA":{
         "Benchmarks":[
@@ -181,28 +199,7 @@ fondo2benchmark = {
 
 bmks_rv = ["^MXX", "^SPESG", "^SPGSCI", "^GSPC", "^NDX"]
 
-spot_df = formatea_precios_spot()
-
-precios_bmks_yahoo_df = formatea_precios_yahoo(bmks_rv)
-
-precios_bmks_df = pd.merge(precios_bmks_yahoo_df, spot_df, on="Fecha", how="left")
-precios_bmks_df["SPESG"] = precios_bmks_df["SPESG_USD"] * precios_bmks_df["Spot"]
-precios_bmks_df["SPGSCI"] = precios_bmks_df["SPGSCI_USD"] * precios_bmks_df["Spot"]
-precios_bmks_df["S&P"] = precios_bmks_df["S&P_USD"] * precios_bmks_df["Spot"]
-precios_bmks_df["NDX"] = precios_bmks_df["NDX_USD"] * precios_bmks_df["Spot"]
-precios_bmks_df.drop(columns=["SPESG_USD", "SPGSCI_USD", "S&P_USD", "NDX_USD"], inplace=True)
-
-precios_bmks_isimp_df = formatea_precios_isimp()
-
-precios_bmks_df = pd.merge(precios_bmks_df, precios_bmks_isimp_df, on="Fecha", how="left")
-
-precios_bmks_acwi_df = formatea_precios_acwi()
-
-precios_bmks_df = pd.merge(precios_bmks_df, precios_bmks_acwi_df, on="Fecha", how="left")
-
-precios_bmks_valmer_df = formatea_precios_bmks_valmer()
-
-precios_bmks_df = pd.merge(precios_bmks_df, precios_bmks_valmer_df, on="Fecha", how="left")
+precios_bmks_df = formatea_precios_bmks()
 
 # for fondo in fondo2benchmark.keys():
 #     rendimientos_df = 
