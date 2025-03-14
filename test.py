@@ -111,4 +111,18 @@ precios_bmks_yahoo_df = pd.merge(precios_bmks_yahoo_df, spot_df, on="Fecha", how
 precios_bmks_yahoo_df["SPESG"] = precios_bmks_yahoo_df["SPESG_USD"] * precios_bmks_yahoo_df["Spot"]
 precios_bmks_yahoo_df["SPGSCI"] = precios_bmks_yahoo_df["SPGSCI_USD"] * precios_bmks_yahoo_df["Spot"]
 
+precios_bmks_isimp_df = pd.read_excel("./ArchivosPeergroups/Benchmarks/Historico_ISIMP.xlsx", skiprows=2, skipfooter=4)
+precios_bmks_isimp_df["Fecha"] = pd.to_datetime(precios_bmks_isimp_df["Fecha"], format="%d/%m/%Y")
+precios_bmks_isimp_df.rename(columns={"Índice":"ISIMP"}, inplace=True)
+precios_bmks_isimp_df = precios_bmks_isimp_df[["Fecha", "ISIMP"]]
+
+precios_bmks_yahoo_df = pd.merge(precios_bmks_yahoo_df, precios_bmks_isimp_df, on="Fecha", how="left")
+
+precios_bmks_acwi_df = pd.read_csv("./ArchivosPeergroups/Benchmarks/Historico_ACWI.csv")
+precios_bmks_acwi_df.rename(columns={"FECHA":"Fecha", "PRECIO SUCIO":"ACWI"}, inplace=True)
+precios_bmks_acwi_df["Fecha"] = pd.to_datetime(precios_bmks_acwi_df["Fecha"], format="%Y-%m-%d")
+precios_bmks_acwi_df = precios_bmks_acwi_df[["Fecha", "ACWI"]]
+
+precios_bmks_yahoo_df = pd.merge(precios_bmks_yahoo_df, precios_bmks_acwi_df, on="Fecha", how="left")
+
 st.write(precios_bmks_yahoo_df)
