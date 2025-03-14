@@ -1,2 +1,3 @@
 yfinance
 openpyxl
+exchange_calendars
