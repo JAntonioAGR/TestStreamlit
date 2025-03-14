@@ -94,12 +94,12 @@ fondo2benchmark = {
 }
 
 bmks_rv = [
-    "^MXX", "^SPESG", "^SPGSCI"
+    "^MXX", "^SPESG", "^SPGSCI", "^GSPC"
 ]
 precios_bmks_yahoo_df = yf.download(bmks_rv, start=datetime(year=fecha.year - 1, month=1, day=1).strftime("%Y-%m-%d"))
 precios_bmks_yahoo_df = precios_bmks_yahoo_df.xs(key="Close", axis=1, level=0)
 precios_bmks_yahoo_df.reset_index(inplace=True)
-precios_bmks_yahoo_df.rename(columns={"Date":"Fecha", "^MXX":"IPC", "^SPESG":"SPESG_USD", "^SPGSCI":"SPGSCI_USD"}, inplace=True)
+precios_bmks_yahoo_df.rename(columns={"Date":"Fecha", "^MXX":"IPC", "^SPESG":"SPESG_USD", "^SPGSCI":"SPGSCI_USD", "^GSPC":"S&P_USD"}, inplace=True)
 precios_bmks_yahoo_df["Fecha"] = pd.to_datetime(precios_bmks_yahoo_df["Fecha"])
 
 spot_df = pd.read_csv("./ArchivosRendimientos/Benchmarks/Historico_SPOT.csv")
@@ -110,7 +110,8 @@ spot_df["Fecha"] = pd.to_datetime(spot_df["Fecha"])
 precios_bmks_df = pd.merge(precios_bmks_yahoo_df, spot_df, on="Fecha", how="left")
 precios_bmks_df["SPESG"] = precios_bmks_df["SPESG_USD"] * precios_bmks_df["Spot"]
 precios_bmks_df["SPGSCI"] = precios_bmks_df["SPGSCI_USD"] * precios_bmks_df["Spot"]
-precios_bmks_df.drop(columns=["SPESG_USD", "SPGSCI_USD"], inplace=True)
+precios_bmks_df["S&P"] = precios_bmks_df["S&P_USD"] * precios_bmks_df["Spot"]
+precios_bmks_df.drop(columns=["SPESG_USD", "SPGSCI_USD", "S&P_USD"], inplace=True)
 
 precios_bmks_isimp_df = pd.read_excel("./ArchivosPeergroups/Benchmarks/Historico_ISIMP.xlsx", skiprows=2, skipfooter=4)
 precios_bmks_isimp_df["Fecha"] = pd.to_datetime(precios_bmks_isimp_df["Fecha"], format="%d/%m/%Y")
