@@ -270,7 +270,7 @@ fondo2benchmark = {
     },
     "NEXTGEN":{
         "Benchmarks":[
-            "NASDAQ"
+            "NDX"
         ],
         "Pesos":[1.0]
     }
