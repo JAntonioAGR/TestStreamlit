@@ -184,7 +184,7 @@ fondo2benchmark = {
     },
     "VECTMD":{
         "Benchmarks":[
-            "CETES 28 AN"
+            "S&P/BMV Sovereign CETES 28 Day Bond Index"
         ],
         "Pesos":[1.0]
     },
