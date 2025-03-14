@@ -8,31 +8,46 @@ fecha = datetime(year=fecha.year, month=fecha.month, day=fecha.day)
 
 fondo2benchmark = {
     "VECTUSA":{
-        "Benchmarks":["SPESG"],
+        "Benchmarks":[
+            "SPESG"
+        ],
         "Pesos":[1.0]
     },
     "VECTCOB":{
-        "Benchmarks":["Spot Valmer"],
+        "Benchmarks":[
+            "Spot"
+        ],
         "Pesos":[1.0]
     },
     "VECTCOR":{
-        "Benchmarks":["ISIMP"],
+        "Benchmarks":[
+            "ISIMP"
+        ],
         "Pesos":[1.0]
     },
     "VECTUSD":{
-        "Benchmarks":["Spot Valmer"],
+        "Benchmarks":[
+            "Spot"
+        ],
         "Pesos":[1.0]
     },
     "VECTFI":{
-        "Benchmarks":["CETES 7+", "MBONOS 1-3"],
+        "Benchmarks":[
+            "S&P/BMV Sovereign CETES 7+ Day Bond Index",
+            "S&P/BMV Sovereign MBONOS 1-3 Year Bond Index"
+        ],
         "Pesos":[0.5, 0.5]
     },
     "VECTIND":{
-        "Benchmarks":["IPC"],
+        "Benchmarks":[
+            "IPC"
+        ],
         "Pesos":[1.0]
     },
     "VECTMD":{
-        "Benchmarks":["CETES 28 AN"],
+        "Benchmarks":[
+            "CETES 28 AN"
+        ],
         "Pesos":[1.0]
     },
     "DYNAMIC":{
@@ -40,47 +55,75 @@ fondo2benchmark = {
         "Pesos":[]
     },
     "VECTPA":{
-        "Benchmarks":["IPC"],
+        "Benchmarks":[
+            "IPC"
+        ],
         "Pesos":[1.0]
     },
     "VECTPRE":{
-        "Benchmarks":["CETES 28 AN"],
+        "Benchmarks":[
+            "S&P/BMV Sovereign CETES 28 Day Bond Index"
+        ],
         "Pesos":[1.0]
     },
     "VECTPZO":{
-        "Benchmarks":["MBONOS 3-5"],
+        "Benchmarks":[
+            "S&P/BMV Sovereign MBONOS 3-5 Year Bond Index"
+        ],
         "Pesos":[1.0]
     },
     "VECTRF":{
-        "Benchmarks":["CETES 28 AN"],
+        "Benchmarks":[
+            "S&P/BMV Sovereign CETES 28 Day Bond Index"
+        ],
         "Pesos":[1.0]
     },
     "VECTSIC":{
-        "Benchmarks":["ACWI"],
+        "Benchmarks":[
+            "ACWI"
+        ],
         "Pesos":[1.0]
     },
     "INCOME":{
-        "Benchmarks":["CETES 28 AN", "CETES 7+", "MBONOS 1-3"],
+        "Benchmarks":[
+            "S&P/BMV Sovereign CETES 28 Day Bond Index", 
+            "S&P/BMV Sovereign CETES 7+ Day Bond Index", 
+            "S&P/BMV Sovereign MBONOS 1-3 Year Bond Index"
+        ],
         "Pesos":[0.4, 0.3, 0.3]
     },
     "EQUITY":{
-        "Benchmarks":["ACWI", "IPC"],
+        "Benchmarks":[
+            "ACWI", 
+            "IPC"
+        ],
         "Pesos":[0.5, 0.5]
     },
     "BALANCE":{
-        "Benchmarks":["CETES 28 DIR", "IPC", "ACWI"],
+        "Benchmarks":[
+            "S&P/BMV Sovereign CETES 28 Day Bond Index", 
+            "IPC", 
+            "ACWI"
+        ],
         "Pesos":[0.7, 0.15, 0.15]
     },
     "VECTTR":{
-        "Benchmarks":["VECTTR"],
-        "Pesos":[1.0]
+        "Benchmarks":[
+            "S&P/BMV Sovereign UDIBONOS 1-3 Year Bond Index",
+            "S&P/BMV Sovereign UDIBONOS 5-10 Year Bond Index"
+        ],
+        "Pesos":[0.4, 0.6]
     },
     "VECTMIX":{
-        "Benchmarks":["S&P 500", "IPC"],
+        "Benchmarks":[
+            "S&P500", "IPC"
+        ],
         "Pesos":[0.5, 0.5]
     },
     "COMMODQ":{
-        "Benchmarks":["COMMODQ"],
+        "Benchmarks":[
+            "SPGSCI"
+        ],
         "Pesos":[1.0]
     },
     "MXRATES":{
@@ -88,19 +131,19 @@ fondo2benchmark = {
         "Pesos":[]
     },
     "NEXTGEN":{
-        "Benchmarks":["NASDAQ"],
+        "Benchmarks":[
+            "NASDAQ"
+        ],
         "Pesos":[1.0]
     }
 }
 
-bmks_rv = [
-    "^MXX", "^SPESG", "^SPGSCI", "^GSPC"
-]
+bmks_rv = ["^MXX", "^SPESG", "^SPGSCI", "^GSPC", "^NDX"]
 
 precios_bmks_yahoo_df = yf.download(bmks_rv, start=datetime(year=fecha.year - 1, month=1, day=1).strftime("%Y-%m-%d"))
 precios_bmks_yahoo_df = precios_bmks_yahoo_df.xs(key="Close", axis=1, level=0)
 precios_bmks_yahoo_df.reset_index(inplace=True)
-precios_bmks_yahoo_df.rename(columns={"Date":"Fecha", "^MXX":"IPC", "^SPESG":"SPESG_USD", "^SPGSCI":"SPGSCI_USD", "^GSPC":"S&P_USD"}, inplace=True)
+precios_bmks_yahoo_df.rename(columns={"Date":"Fecha", "^MXX":"IPC", "^SPESG":"SPESG_USD", "^SPGSCI":"SPGSCI_USD", "^GSPC":"S&P_USD", "^NDX":"NDX_USD"}, inplace=True)
 precios_bmks_yahoo_df["Fecha"] = pd.to_datetime(precios_bmks_yahoo_df["Fecha"])
 
 spot_df = pd.read_csv("./ArchivosRendimientos/Benchmarks/Historico_SPOT.csv")
@@ -112,7 +155,8 @@ precios_bmks_df = pd.merge(precios_bmks_yahoo_df, spot_df, on="Fecha", how="left
 precios_bmks_df["SPESG"] = precios_bmks_df["SPESG_USD"] * precios_bmks_df["Spot"]
 precios_bmks_df["SPGSCI"] = precios_bmks_df["SPGSCI_USD"] * precios_bmks_df["Spot"]
 precios_bmks_df["S&P"] = precios_bmks_df["S&P_USD"] * precios_bmks_df["Spot"]
-precios_bmks_df.drop(columns=["SPESG_USD", "SPGSCI_USD", "S&P_USD"], inplace=True)
+precios_bmks_df["NDX"] = precios_bmks_df["NDX_USD"] * precios_bmks_df["Spot"]
+precios_bmks_df.drop(columns=["SPESG_USD", "SPGSCI_USD", "S&P_USD", "NDX_USD"], inplace=True)
 
 precios_bmks_isimp_df = pd.read_excel("./ArchivosPeergroups/Benchmarks/Historico_ISIMP.xlsx", skiprows=2, skipfooter=4)
 precios_bmks_isimp_df["Fecha"] = pd.to_datetime(precios_bmks_isimp_df["Fecha"], format="%d/%m/%Y")
@@ -131,7 +175,10 @@ precios_bmks_df = pd.merge(precios_bmks_df, precios_bmks_acwi_df, on="Fecha", ho
 precios_bmks_valmer_df = pd.read_csv("./ArchivosPeergroups/Benchmarks/Benchmarks_SP_Historico_MD.csv")
 precios_bmks_valmer_df.rename(columns={"FECHA":"Fecha"}, inplace=True)
 precios_bmks_valmer_df["Fecha"] = pd.to_datetime(precios_bmks_valmer_df["Fecha"], format="%Y%m%d")
+precios_bmks_valmer_df.drop(columns=[col for col in precios_bmks_valmer_df.columns if "Unnamed" in col], inplace=True)
 
 precios_bmks_df = pd.merge(precios_bmks_df, precios_bmks_valmer_df, on="Fecha", how="left")
+
+
 
 st.write(precios_bmks_df)
