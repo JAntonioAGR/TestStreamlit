@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import calendar
 import exchange_calendars as xcals
+import numpy as np
 
 def formatea_precios_yahoo(bmks_rv):
     precios_bmks_yahoo_df = yf.download(bmks_rv, start=datetime(year=fecha.year - 1, month=1, day=1).strftime("%Y-%m-%d"))
@@ -310,6 +311,8 @@ for ventana in fechas_habiles_iniciales_rv.keys():
         bmks = fondo2benchmark[fondo]["Benchmarks"]
         pesos = fondo2benchmark[fondo]["Pesos"]
         rendimiento_bmk = ((precios_bmks_df[bmks].loc[fecha_final]/precios_bmks_df[bmks].loc[fecha_inicial] - 1) * pesos).sum()
+        if len(bmks) == 0:
+            rendimiento_bmk = np.nan
 
         rendimientos_bmk_ventana.append(rendimiento_bmk)
 
