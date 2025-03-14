@@ -96,6 +96,7 @@ fondo2benchmark = {
 bmks_rv = [
     "^MXX", "^SPESG", "^SPGSCI", "^GSPC"
 ]
+
 precios_bmks_yahoo_df = yf.download(bmks_rv, start=datetime(year=fecha.year - 1, month=1, day=1).strftime("%Y-%m-%d"))
 precios_bmks_yahoo_df = precios_bmks_yahoo_df.xs(key="Close", axis=1, level=0)
 precios_bmks_yahoo_df.reset_index(inplace=True)
@@ -126,5 +127,11 @@ precios_bmks_acwi_df["Fecha"] = pd.to_datetime(precios_bmks_acwi_df["Fecha"], fo
 precios_bmks_acwi_df = precios_bmks_acwi_df[["Fecha", "ACWI"]]
 
 precios_bmks_df = pd.merge(precios_bmks_df, precios_bmks_acwi_df, on="Fecha", how="left")
+
+precios_bmks_valmer_df = pd.read_csv("./ArchivosPeergroups/Benchmarks/Benchmarks_SP_Historico_MD.csv")
+precios_bmks_valmer_df.rename(columns={"FECHA":"Fecha"}, inplace=True)
+precios_bmks_valmer_df["Fecha"] = pd.to_datetime(precios_bmks_valmer_df["Fecha"], format="%Y%m%d")
+
+precios_bmks_df = pd.merge(precios_bmks_df, precios_bmks_valmer_df, on="Fecha", how="left")
 
 st.write(precios_bmks_df)
