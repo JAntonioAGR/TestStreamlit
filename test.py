@@ -309,7 +309,7 @@ for ventana in fechas_habiles_iniciales_rv.keys():
 
         bmks = fondo2benchmark[fondo]["Benchmarks"]
         pesos = fondo2benchmark[fondo]["Pesos"]
-        rendimiento_bmk = ((rendimientos_bmks_df[bmks].loc[fecha_final]/rendimientos_bmks_df[bmks].loc[fecha_inicial] - 1) * pesos).sum()
+        rendimiento_bmk = ((precios_bmks_df[bmks].loc[fecha_final]/precios_bmks_df[bmks].loc[fecha_inicial] - 1) * pesos).sum()
 
         rendimientos_bmk_ventana.append(rendimiento_bmk)
 
