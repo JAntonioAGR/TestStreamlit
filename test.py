@@ -2,9 +2,11 @@ import streamlit as st
 import yfinance as yf
 from datetime import datetime
 import pandas as pd
-
-fecha = datetime.today()
-fecha = datetime(year=fecha.year, month=fecha.month, day=fecha.day)
+from pandas.tseries.offsets import CustomBusinessDay
+from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
+import calendar
+import exchange_calendars as xcals
 
 def formatea_precios_yahoo(bmks_rv):
     precios_bmks_yahoo_df = yf.download(bmks_rv, start=datetime(year=fecha.year - 1, month=1, day=1).strftime("%Y-%m-%d"))
@@ -64,6 +66,82 @@ def formatea_precios_bmks():
     precios_bmks_df = pd.merge(precios_bmks_df, precios_bmks_valmer_df, on="Fecha", how="left")
 
     return precios_bmks_df
+
+def infer_calendar(dates):
+    """
+    Infer a calendar as pandas DateOffset from a list of dates.
+    Parameters
+    ----------
+    dates : array-like (1-dimensional) or pd.DatetimeIndex
+        The dates you want to build a calendar from
+    Returns
+    -------
+    calendar : pd.DateOffset (CustomBusinessDay)
+    """
+    dates = pd.DatetimeIndex(dates)
+
+    traded_weekdays = []
+    holidays = []
+
+    days_of_the_week = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    for day, day_str in enumerate(days_of_the_week):
+
+        weekday_mask = (dates.dayofweek == day)
+
+        # keep only days of the week that are present
+        if not weekday_mask.any():
+            continue
+        traded_weekdays.append(day_str)
+
+        # look for holidays
+        used_weekdays = dates[weekday_mask].normalize()
+        all_weekdays = pd.date_range(dates.min(), dates.max(),
+                                     freq=CustomBusinessDay(weekmask=day_str)
+                                     ).normalize()
+        _holidays = all_weekdays.difference(used_weekdays)
+        _holidays = [timestamp.date() for timestamp in _holidays]
+        holidays.extend(_holidays)
+
+    traded_weekdays = ' '.join(traded_weekdays)
+    return CustomBusinessDay(weekmask=traded_weekdays, holidays=holidays)
+
+def calcula_fechas_exactas_iniciales(fecha):
+    if fecha.month == 1:
+        year = fecha.year - 1
+        month = 12
+    else:
+        year = fecha.year
+        month = fecha.month - 1
+
+    fechas_exactas_iniciales = {
+        "MTD": datetime(year=year, month=month, day=calendar.monthrange(year, month)[1]),
+        "YTD": datetime(year=fecha.year - 1, month=12, day=calendar.monthrange(year=fecha.year - 1, month=12)[1]),
+        "12 Meses": fecha - timedelta(days=366 if calendar.isleap(year) else 365),
+        "30D": fecha - timedelta(days=30),
+        "90D": fecha - timedelta(days=90),
+        "180D": fecha - timedelta(days=180)
+    }
+
+    return fechas_exactas_iniciales
+
+def calcula_fecha_habil_proxima_anterior(fecha_exacta, fechas_bmv, bmv_offset):
+    return (fecha_exacta - bmv_offset).to_pydatetime() if fecha_exacta not in fechas_bmv else fecha_exacta
+
+def calcula_fecha_habil_proxima_posterior(fecha_exacta, fechas_bmv, bmv_offset):
+    return (fecha_exacta + bmv_offset).to_pydatetime() if fecha_exacta not in fechas_bmv else fecha_exacta
+
+def calcula_fechas_habiles_iniciales(fechas_exactas_iniciales, fechas_bmv, bmv_offset, tipo="Deuda"):
+    if tipo == "Deuda":
+        fechas_habiles_iniciales = {
+            ventana:calcula_fecha_habil_proxima_anterior(fechas_exactas_iniciales[ventana], fechas_bmv, bmv_offset) for ventana in fechas_exactas_iniciales.keys()
+        }
+    
+    else:
+        fechas_habiles_iniciales = {
+            ventana:calcula_fecha_habil_proxima_posterior(fechas_exactas_iniciales[ventana] + timedelta(days=1), fechas_bmv, bmv_offset) for ventana in fechas_exactas_iniciales.keys()
+        }
+
+    return fechas_habiles_iniciales
 
 fondo2benchmark = {
     "VECTUSA":{
@@ -199,9 +277,27 @@ fondo2benchmark = {
 
 bmks_rv = ["^MXX", "^SPESG", "^SPGSCI", "^GSPC", "^NDX"]
 
+fecha = datetime.today()
+fecha = datetime(year=fecha.year, month=fecha.month, day=fecha.day)
+
+xmex = xcals.get_calendar("XMEX")
+fechas_bmv = sorted(xmex.sessions_in_range(
+    start=(datetime.today() - relativedelta(years=20) + timedelta(days=2)).strftime("%Y-%m-%d"), 
+    end=datetime.today().strftime("%Y-%m-%d")
+).to_pydatetime())
+fechas_bmv.remove(datetime(2024, 10, 1, 0, 0))
+
+bmv_offset = infer_calendar(fechas_bmv)
+
+fechas_exactas_iniciales_rf = calcula_fechas_exactas_iniciales(fecha)
+fechas_habiles_iniciales_rf = calcula_fechas_habiles_iniciales(fechas_exactas_iniciales_rf, fechas_bmv, bmv_offset, tipo="Deuda")
+
+fechas_exactas_iniciales_rv = calcula_fechas_exactas_iniciales((fecha - bmv_offset).to_pydatetime())
+fechas_habiles_iniciales_rv = calcula_fechas_habiles_iniciales(fechas_exactas_iniciales_rv, fechas_bmv, bmv_offset, tipo="RV")
+
 precios_bmks_df = formatea_precios_bmks()
 
 # for fondo in fondo2benchmark.keys():
 #     rendimientos_df = 
 
-st.write(precios_bmks_df)
+st.write(fechas_habiles_iniciales_rv)
