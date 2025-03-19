@@ -280,6 +280,7 @@ fondo2benchmark = {
 bmks_rv = ["^MXX", "^SPESG", "^SPGSCI", "^GSPC", "^NDX"]
 
 fecha = datetime.today()
+st.write(fecha)
 fecha = datetime(year=fecha.year, month=fecha.month, day=fecha.day)
 
 xmex = xcals.get_calendar("XMEX")
