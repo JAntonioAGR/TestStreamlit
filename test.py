@@ -10,6 +10,7 @@ import exchange_calendars as xcals
 import numpy as np
 
 def formatea_precios_yahoo(bmks_rv, fecha):
+    st.write(fecha.year)
     precios_bmks_yahoo_df = yf.download(bmks_rv, start=datetime(year=fecha.year - 1, month=1, day=1).strftime("%Y-%m-%d"))
     precios_bmks_yahoo_df = precios_bmks_yahoo_df.xs(key="Close", axis=1, level=0)
     precios_bmks_yahoo_df.reset_index(inplace=True)
@@ -280,7 +281,6 @@ fondo2benchmark = {
 bmks_rv = ["^MXX", "^SPESG", "^SPGSCI", "^GSPC", "^NDX"]
 
 fecha = datetime.today()
-st.write(fecha)
 fecha = datetime(year=fecha.year, month=fecha.month, day=fecha.day)
 
 xmex = xcals.get_calendar("XMEX")
