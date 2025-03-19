@@ -10,7 +10,6 @@ import exchange_calendars as xcals
 import numpy as np
 
 def formatea_precios_yahoo(bmks_rv, fecha):
-    st.write(fecha.year)
     precios_bmks_yahoo_df = yf.download(bmks_rv, start=datetime(year=fecha.year - 1, month=1, day=1).strftime("%Y-%m-%d"))
     precios_bmks_yahoo_df = precios_bmks_yahoo_df.xs(key="Close", axis=1, level=0)
     precios_bmks_yahoo_df.reset_index(inplace=True)
@@ -285,7 +284,7 @@ fecha = datetime(year=fecha.year, month=fecha.month, day=fecha.day)
 
 xmex = xcals.get_calendar("XMEX")
 fechas_bmv = sorted(xmex.sessions_in_range(
-    start=(datetime.today() - relativedelta(years=20) + timedelta(days=2)).strftime("%Y-%m-%d"), 
+    start=(datetime.today() - relativedelta(years=20) + timedelta(days=3)).strftime("%Y-%m-%d"), 
     end=datetime.today().strftime("%Y-%m-%d")
 ).to_pydatetime())
 fechas_bmv.remove(datetime(2024, 10, 1, 0, 0))
