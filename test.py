@@ -9,7 +9,7 @@ import calendar
 import exchange_calendars as xcals
 import numpy as np
 
-def formatea_precios_yahoo(bmks_rv):
+def formatea_precios_yahoo(bmks_rv, fecha):
     precios_bmks_yahoo_df = yf.download(bmks_rv, start=datetime(year=fecha.year - 1, month=1, day=1).strftime("%Y-%m-%d"))
     precios_bmks_yahoo_df = precios_bmks_yahoo_df.xs(key="Close", axis=1, level=0)
     precios_bmks_yahoo_df.reset_index(inplace=True)
@@ -50,9 +50,9 @@ def formatea_precios_bmks_valmer():
 
     return precios_bmks_valmer_df
 
-def formatea_precios_bmks():
+def formatea_precios_bmks(fecha):
     spot_df = formatea_precios_spot()
-    precios_bmks_yahoo_df = formatea_precios_yahoo(bmks_rv)
+    precios_bmks_yahoo_df = formatea_precios_yahoo(bmks_rv, fecha)
     precios_bmks_df = pd.merge(precios_bmks_yahoo_df, spot_df, on="Fecha", how="left")
     precios_bmks_df["SPESG"] = precios_bmks_df["SPESG_USD"] * precios_bmks_df["Spot"]
     precios_bmks_df["SPGSCI"] = precios_bmks_df["SPGSCI_USD"] * precios_bmks_df["Spot"]
@@ -297,7 +297,7 @@ fechas_habiles_iniciales_rf = calcula_fechas_habiles_iniciales(fechas_exactas_in
 fechas_exactas_iniciales_rv = calcula_fechas_exactas_iniciales((fecha - bmv_offset).to_pydatetime())
 fechas_habiles_iniciales_rv = calcula_fechas_habiles_iniciales(fechas_exactas_iniciales_rv, fechas_bmv, bmv_offset, tipo="RV")
 
-precios_bmks_df = formatea_precios_bmks()
+precios_bmks_df = formatea_precios_bmks(fecha)
 
 st.write(precios_bmks_df)
 
