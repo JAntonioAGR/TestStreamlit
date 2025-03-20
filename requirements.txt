@@ -2,3 +2,4 @@ yfinance
 openpyxl
 exchange_calendars
 selenium
+lxml
