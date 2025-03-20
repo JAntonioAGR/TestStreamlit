@@ -331,8 +331,8 @@ for ventana in fechas_habiles_iniciales_rv.keys():
         if len(bmks) == 0:
             rendimiento_bmk = np.nan
         
-        # if tipo_fondo == "RF":
-        #     rendimiento_bmk = rendimiento_bmk * 360/(fecha - fechas_habiles_iniciales[ventana]).days
+        if tipo_fondo == "RF":
+            rendimiento_bmk = rendimiento_bmk * 360/(fecha - fechas_habiles_iniciales[ventana]).days
 
         rendimientos_bmk_ventana.append(rendimiento_bmk)
 
