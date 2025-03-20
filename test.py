@@ -300,7 +300,7 @@ fechas_habiles_iniciales_rv = calcula_fechas_habiles_iniciales(fechas_exactas_in
 precios_bmks_df = formatea_precios_bmks(fecha)
 
 st.write(precios_bmks_df)
-st.write(fechas_exactas_iniciales_rf)
+st.write(fechas_habiles_iniciales_rf)
 st.write(fechas_habiles_iniciales_rv)
 
 rendimientos_bmks_df = pd.DataFrame()
