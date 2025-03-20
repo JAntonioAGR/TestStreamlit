@@ -321,7 +321,7 @@ for ventana in fechas_habiles_iniciales_rv.keys():
         fecha_inicial = (fechas_habiles_iniciales_rv[ventana] - bmv_offset).to_pydatetime()
         fecha_final = (fecha - bmv_offset).to_pydatetime()
 
-        if fondo == "VECTUSA" & ventana == "MTD":
+        if fondo == "VECTUSA" and ventana == "MTD":
             st.write(fecha_inicial)
             st.write(fecha_final)
 
