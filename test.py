@@ -147,6 +147,34 @@ def calcula_fechas_habiles_iniciales(fechas_exactas_iniciales, fechas_bmv, bmv_o
 
     return fechas_habiles_iniciales
 
+def formatea_rendimientos_bmk(fecha, precios_bmks_df, fechas_habiles_iniciales_rf, fechas_habiles_iniciales_rv, propiedades_fondos_df, bmv_offset, fondo2benchmark):
+    rendimientos_bmks_df = pd.DataFrame()
+    for ventana in fechas_habiles_iniciales_rv.keys():
+        rendimientos_bmk_ventana = []
+        for fondo in fondo2benchmark.keys():
+            tipo_fondo = propiedades_fondos_df.loc[propiedades_fondos_df["Fondo"] == fondo, "Tipo"].item()
+            fechas_habiles_iniciales = fechas_habiles_iniciales_rv if tipo_fondo == "RV" else fechas_habiles_iniciales_rf
+
+            fecha_inicial = (fechas_habiles_iniciales[ventana] - bmv_offset).to_pydatetime()
+            fecha_final = (fecha - bmv_offset).to_pydatetime()
+
+            bmks = fondo2benchmark[fondo]["Benchmarks"]
+            pesos = fondo2benchmark[fondo]["Pesos"]
+            rendimiento_bmk = ((precios_bmks_df[bmks].loc[fecha_final]/precios_bmks_df[bmks].loc[fecha_inicial] - 1) * pesos).sum()
+
+            if len(bmks) == 0:
+                rendimiento_bmk = np.nan
+            
+            if tipo_fondo == "RF":
+                rendimiento_bmk = rendimiento_bmk * 360/(fecha - fechas_habiles_iniciales[ventana]).days
+
+            rendimientos_bmk_ventana.append(rendimiento_bmk)
+
+        rendimientos_bmk_ventana_df = pd.DataFrame({ventana:rendimientos_bmk_ventana}, index=fondo2benchmark.keys())
+        rendimientos_bmks_df = pd.concat([rendimientos_bmks_df, rendimientos_bmk_ventana_df], axis=1)
+
+    return rendimientos_bmks_df
+
 fondo2benchmark = {
     "VECTUSA":{
         "Benchmarks":[
@@ -314,30 +342,32 @@ st.write(precios_bmks_df)
 # st.write(fechas_habiles_iniciales_rv)
 # st.write(propiedades_fondos_df)
 
-rendimientos_bmks_df = pd.DataFrame()
-for ventana in fechas_habiles_iniciales_rv.keys():
-    rendimientos_bmk_ventana = []
-    for fondo in fondo2benchmark.keys():
-        tipo_fondo = propiedades_fondos_df.loc[propiedades_fondos_df["Fondo"] == fondo, "Tipo"].item()
-        fechas_habiles_iniciales = fechas_habiles_iniciales_rv if tipo_fondo == "RV" else fechas_habiles_iniciales_rf
+# rendimientos_bmks_df = pd.DataFrame()
+# for ventana in fechas_habiles_iniciales_rv.keys():
+#     rendimientos_bmk_ventana = []
+#     for fondo in fondo2benchmark.keys():
+#         tipo_fondo = propiedades_fondos_df.loc[propiedades_fondos_df["Fondo"] == fondo, "Tipo"].item()
+#         fechas_habiles_iniciales = fechas_habiles_iniciales_rv if tipo_fondo == "RV" else fechas_habiles_iniciales_rf
 
-        fecha_inicial = (fechas_habiles_iniciales[ventana] - bmv_offset).to_pydatetime()
-        fecha_final = (fecha - bmv_offset).to_pydatetime()
+#         fecha_inicial = (fechas_habiles_iniciales[ventana] - bmv_offset).to_pydatetime()
+#         fecha_final = (fecha - bmv_offset).to_pydatetime()
 
-        bmks = fondo2benchmark[fondo]["Benchmarks"]
-        pesos = fondo2benchmark[fondo]["Pesos"]
-        rendimiento_bmk = ((precios_bmks_df[bmks].loc[fecha_final]/precios_bmks_df[bmks].loc[fecha_inicial] - 1) * pesos).sum()
+#         bmks = fondo2benchmark[fondo]["Benchmarks"]
+#         pesos = fondo2benchmark[fondo]["Pesos"]
+#         rendimiento_bmk = ((precios_bmks_df[bmks].loc[fecha_final]/precios_bmks_df[bmks].loc[fecha_inicial] - 1) * pesos).sum()
 
-        if len(bmks) == 0:
-            rendimiento_bmk = np.nan
+#         if len(bmks) == 0:
+#             rendimiento_bmk = np.nan
         
-        if tipo_fondo == "RF":
-            rendimiento_bmk = rendimiento_bmk * 360/(fecha - fechas_habiles_iniciales[ventana]).days
+#         if tipo_fondo == "RF":
+#             rendimiento_bmk = rendimiento_bmk * 360/(fecha - fechas_habiles_iniciales[ventana]).days
 
-        rendimientos_bmk_ventana.append(rendimiento_bmk)
+#         rendimientos_bmk_ventana.append(rendimiento_bmk)
 
-    rendimientos_bmk_ventana_df = pd.DataFrame({ventana:rendimientos_bmk_ventana}, index=fondo2benchmark.keys())
-    rendimientos_bmks_df = pd.concat([rendimientos_bmks_df, rendimientos_bmk_ventana_df], axis=1)
+#     rendimientos_bmk_ventana_df = pd.DataFrame({ventana:rendimientos_bmk_ventana}, index=fondo2benchmark.keys())
+#     rendimientos_bmks_df = pd.concat([rendimientos_bmks_df, rendimientos_bmk_ventana_df], axis=1)
+
+rendimientos_bmks_df = formatea_rendimientos_bmk(fecha, precios_bmks_df, fechas_habiles_iniciales_rf, fechas_habiles_iniciales_rv, propiedades_fondos_df, bmv_offset, fondo2benchmark)
 
 
 st.write(rendimientos_bmks_df)
