@@ -8,6 +8,7 @@ from dateutil.relativedelta import relativedelta
 import calendar
 import exchange_calendars as xcals
 import numpy as np
+import os
 
 def formatea_precios_yahoo(bmks_rv, fecha):
     precios_bmks_yahoo_df = yf.download(bmks_rv, start=datetime(year=fecha.year - 1, month=1, day=1).strftime("%Y-%m-%d"))
@@ -280,6 +281,10 @@ fondo2benchmark = {
 
 bmks_rv = ["^MXX", "^SPESG", "^SPGSCI", "^GSPC", "^NDX"]
 
+propiedades_fondos_path = "./ArchivosRendimientos/PropiedadesFondos"
+propiedades_fondos_filename = os.listdir(propiedades_fondos_path)[0]
+propiedades_fondos_df = pd.read_excel(os.path.join(propiedades_fondos_path, propiedades_fondos_filename))
+
 fecha = datetime.today()
 fecha = datetime(year=fecha.year, month=fecha.month, day=fecha.day)
 
@@ -304,15 +309,16 @@ fechas_habiles_iniciales_rv = calcula_fechas_habiles_iniciales(fechas_exactas_in
 
 precios_bmks_df = formatea_precios_bmks(fecha)
 
-st.write(precios_bmks_df)
-st.write(fechas_habiles_iniciales_rf)
-st.write(fechas_habiles_iniciales_rv)
+# st.write(precios_bmks_df)
+# st.write(fechas_habiles_iniciales_rf)
+# st.write(fechas_habiles_iniciales_rv)
+st.write(propiedades_fondos_df)
 
 rendimientos_bmks_df = pd.DataFrame()
 for ventana in fechas_habiles_iniciales_rv.keys():
     rendimientos_bmk_ventana = []
     for fondo in fondo2benchmark.keys():
-        fecha_inicial = fechas_habiles_iniciales_rv[ventana]
+        fecha_inicial = (fechas_habiles_iniciales_rv[ventana] - bmv_offset).to_pydatetime()
         fecha_final = (fecha - bmv_offset).to_pydatetime()
 
         bmks = fondo2benchmark[fondo]["Benchmarks"]
