@@ -68,7 +68,7 @@ def formatea_precios_bmks(fecha):
     precios_bmks_df = pd.merge(precios_bmks_df, precios_bmks_valmer_df, on="Fecha", how="left")
     precios_bmks_df.set_index("Fecha", inplace=True)
 
-    return precios_bmks_df
+    return precios_bmks_df.ffill()
 
 def infer_calendar(dates):
     """
