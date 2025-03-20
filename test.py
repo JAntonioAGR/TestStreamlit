@@ -492,6 +492,6 @@ rendimientos_bmks_df = formatea_rendimientos_bmk(fecha, precios_bmks_df, fechas_
 
 st.write(rendimientos_bmks_df)
 
-rendimientos_df = formatea_rendimientos_fondos(fecha, precios_fondos_df, fechas_habiles_iniciales_rf, fechas_habiles_iniciales_rv, propiedades_fondos_df)
+rendimientos_fondos_df = formatea_rendimientos_fondos(fecha, precios_fondos_df, fechas_habiles_iniciales_rf, fechas_habiles_iniciales_rv, propiedades_fondos_df)
 
-st.write(rendimientos_df)
+st.write(rendimientos_fondos_df)
