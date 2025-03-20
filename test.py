@@ -9,6 +9,11 @@ import calendar
 import exchange_calendars as xcals
 import numpy as np
 import os
+import time
+import io
+from selenium import webdriver 
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
 
 def formatea_precios_yahoo(bmks_rv, fecha):
     precios_bmks_yahoo_df = yf.download(bmks_rv, start=datetime(year=fecha.year - 1, month=1, day=1).strftime("%Y-%m-%d"))
@@ -175,6 +180,123 @@ def formatea_rendimientos_bmk(fecha, precios_bmks_df, fechas_habiles_iniciales_r
 
     return rendimientos_bmks_df
 
+def formatea_rendimientos_fondos(fecha, precios_fondos_df, fechas_habiles_iniciales_rf, fechas_habiles_iniciales_rv, propiedades_fondos_df):
+    rendimientos_df = pd.DataFrame()
+    for tipo in ["RF", "RV"]:
+        fondos = propiedades_fondos_df.loc[propiedades_fondos_df["Tipo"] == tipo, "Fondo"].tolist()
+        fechas_habiles_iniciales = fechas_habiles_iniciales_rf if tipo == "RF" else fechas_habiles_iniciales_rv
+        temp_rendimientos_df = calcula_rendimientos_fondos(precios_fondos_df, fondos, fecha, fechas_habiles_iniciales)
+        if temp_rendimientos_df.index.isin(propiedades_fondos_df[~propiedades_fondos_df["Serie"].isin(["XF0", "XF"])]["Fondo"]).any():
+            temp_rendimientos_brutos_df = calcula_rendimientos_brutos(temp_rendimientos_df, propiedades_fondos_df, 0.005, fecha, fechas_habiles_iniciales_rf, fechas_habiles_iniciales_rv)
+            temp_rendimientos_df.loc[propiedades_fondos_df[~propiedades_fondos_df["Serie"].isin(["XF0", "XF"])]["Fondo"]] = temp_rendimientos_brutos_df.copy()
+
+        rendimientos_df = pd.concat([rendimientos_df, temp_rendimientos_df], axis=0)
+
+    fondos_a_anualizar = propiedades_fondos_df.loc[propiedades_fondos_df["Tipo"] == "RF", "Fondo"].tolist() + ["BALANCE", "DYNAMIC"]
+    temp_rendimientos_df = rendimientos_df.loc[fondos_a_anualizar].copy()
+    temp_rendimientos_df = calcula_rendimientos_anualizados(temp_rendimientos_df, fecha, fechas_habiles_iniciales)
+    rendimientos_df.loc[fondos_a_anualizar] = temp_rendimientos_df.copy()
+
+    return rendimientos_df
+
+def formatea_columna_tabla_rendimientos_MiVector(col):
+    temp_col = col.copy()
+    if temp_col.dtype == "O":
+        temp_col = temp_col.replace("N[/]D[\%]", "", regex=True)
+        temp_col = temp_col.replace("%|,", "", regex=True)
+        temp_col = temp_col.replace("", np.nan, regex=True)
+
+        if temp_col.isna().sum() != len(temp_col):
+            if not temp_col.str.contains(r"[A-Za-z]").any():
+                temp_col = temp_col.astype(float)
+                temp_col = temp_col/100 if col.name not in ["Precio", "(+)Títulos en Circulación"] else temp_col
+
+    return temp_col
+
+def descarga_rendimientos_MiVector(fechas):
+    chrome_options = Options()
+    chrome_options.add_argument("--headless=new")
+    driver = webdriver.Chrome(options=chrome_options)
+    start_url = "https://www.vectoronline.com.mx/servicios/fondos/consultas/precios_rendimientos.php"
+    driver.get(start_url)
+
+    rendimientos_MiVector_fechas_df = pd.DataFrame()
+    for fecha_dt in fechas:
+        fecha_str = fecha_dt.strftime("%Y-%m-%d")
+        time.sleep(3)
+
+        driver.find_element(by=By.ID, value="dpFecha").clear()
+        driver.find_element(by=By.ID, value="dpFecha").send_keys(fecha_str)
+        driver.find_element(by=By.ID, value="btnMostrar").click()
+
+        time.sleep(3)
+
+        tables = pd.read_html(io.StringIO(driver.page_source))
+
+        rendimientos_MiVector_df = []
+        for i in range(len(tables)):
+            if i % 2 != 0:
+                col_names = tables[i - 1].columns
+                temp_df = tables[i].rename(columns={i:col_names[i] for i in range(len(col_names))})
+                temp_records = temp_df.to_dict(orient="records")
+                rendimientos_MiVector_df.extend(temp_records)
+
+        rendimientos_MiVector_df = pd.DataFrame.from_records(rendimientos_MiVector_df)
+        rendimientos_MiVector_df["Fecha"] = fecha_str
+        rendimientos_MiVector_fechas_df = pd.concat([rendimientos_MiVector_fechas_df, rendimientos_MiVector_df], axis=0, ignore_index=True)
+
+    rendimientos_MiVector_fechas_df["Fecha"] = pd.to_datetime(rendimientos_MiVector_fechas_df["Fecha"], format="%Y-%m-%d")
+    rendimientos_MiVector_fechas_df = rendimientos_MiVector_fechas_df.apply(lambda col: formatea_columna_tabla_rendimientos_MiVector(col), axis=0)
+
+    driver.close()
+
+    return rendimientos_MiVector_fechas_df
+
+def calcula_rendimientos_fondos(precios_fondos_df, fondos, fecha, fechas_habiles_iniciales):
+    rendimientos_df = pd.DataFrame()
+    for ventana in fechas_habiles_iniciales.keys():
+        fecha_ventana = fechas_habiles_iniciales[ventana]
+        rendimientos_ventana_df = precios_fondos_df.loc[fecha, fondos]/precios_fondos_df.loc[fecha_ventana, fondos] - 1
+        rendimientos_ventana_df.name = ventana
+        rendimientos_ventana_df = rendimientos_ventana_df.to_frame()
+        rendimientos_df = pd.concat([rendimientos_df, rendimientos_ventana_df], axis=1)
+
+    return rendimientos_df
+
+def calcula_rendimientos_anualizados(rendimientos_df, fecha, fechas_habiles_iniciales):
+    rendimientos_anualizados_df = rendimientos_df.copy()
+    for ventana in rendimientos_anualizados_df:
+        dias_transcurridos = (fecha - fechas_habiles_iniciales[ventana]).days
+        rendimientos_anualizados_df[ventana] = rendimientos_anualizados_df[ventana] * 360 / dias_transcurridos
+
+    return rendimientos_anualizados_df
+
+def calcula_rendimientos_brutos(rendimientos_df, propiedades_fondos_df, impuesto, fecha, fechas_habiles_iniciales_rf, fechas_habiles_iniciales_rv):
+    temp_df = propiedades_fondos_df[~propiedades_fondos_df["Serie"].isin(["XF0", "XF"])].copy()
+    temp_df[["Comision", "Factor RF"]] /= 100
+
+    dias_transcurridos_ventanas_df = pd.DataFrame([
+            {ventana:(fecha - fechas_habiles_iniciales_rf[ventana]).days for ventana in fechas_habiles_iniciales_rf}|{"Tipo":"RF"},
+            {ventana:(fecha - fechas_habiles_iniciales_rv[ventana]).days for ventana in fechas_habiles_iniciales_rv}|{"Tipo":"RV"}
+    ])
+
+    temp_df = pd.merge(temp_df, dias_transcurridos_ventanas_df, on="Tipo")
+    temp_df.set_index("Fondo", inplace=True)
+    temp_df.index.name = None
+
+    comisiones_srs = temp_df["Comision"]
+    ajustes_comision_srs = (comisiones_srs * 1.16)/ 360
+    ajustes_comision_df = temp_df[list(fechas_habiles_iniciales_rf.keys())].multiply(ajustes_comision_srs, axis=0)
+
+    factores_rf_srs = temp_df["Factor RF"]
+    ajustes_impuesto_srs = (factores_rf_srs * impuesto)/360
+    ajustes_impuesto_df = temp_df[list(fechas_habiles_iniciales_rf.keys())].multiply(ajustes_impuesto_srs, axis=0)
+
+    rendimientos_brutos_df = rendimientos_df.loc[temp_df.index.tolist()].copy()
+    rendimientos_brutos_df = (1 + rendimientos_brutos_df)/(1 - ajustes_comision_df) + ajustes_impuesto_df - 1
+
+    return rendimientos_brutos_df
+
 fondo2benchmark = {
     "VECTUSA":{
         "Benchmarks":[
@@ -313,6 +435,30 @@ propiedades_fondos_path = "./ArchivosRendimientos/PropiedadesFondos"
 propiedades_fondos_filename = os.listdir(propiedades_fondos_path)[0]
 propiedades_fondos_df = pd.read_excel(os.path.join(propiedades_fondos_path, propiedades_fondos_filename))
 
+precios_fondos_valmer_path = "./ArchivosPeergroups/PreciosFondosValmer"
+precios_fondos_valmer_filename = os.listdir(precios_fondos_valmer_path)[0]
+precios_fondos_valmer_df = pd.read_csv(os.path.join(precios_fondos_valmer_path, precios_fondos_valmer_filename))
+precios_fondos_valmer_df = precios_fondos_valmer_df[["FECHA", "EMISORA", "SERIE", "PRECIO SUCIO"]]
+precios_fondos_valmer_df.rename(columns={"FECHA":"Fecha", "EMISORA":"Fondo", "SERIE":"Serie", "PRECIO SUCIO":"Precio"}, inplace=True)
+precios_fondos_valmer_df["Fecha"] = pd.to_datetime(precios_fondos_valmer_df["Fecha"], format="%Y-%m-%d")
+
+precios_fondos_df = precios_fondos_valmer_df.copy()
+precios_fondos_df = precios_fondos_df[
+    pd.Series(list(zip(precios_fondos_df["Fondo"], precios_fondos_df["Serie"]))).isin(list(zip(propiedades_fondos_df["Fondo"], propiedades_fondos_df["Serie"])))
+].reset_index(drop=True)
+
+fechas = [datetime.today()]
+temp_precios_fondos_df = descarga_rendimientos_MiVector(fechas)
+temp_precios_fondos_df = temp_precios_fondos_df[
+    pd.Series(list(zip(temp_precios_fondos_df["Fondo"], temp_precios_fondos_df["Serie"]))).isin(list(zip(propiedades_fondos_df["Fondo"], propiedades_fondos_df["Serie"])))
+].reset_index(drop=True)
+temp_precios_fondos_df = temp_precios_fondos_df[["Fecha", "Fondo", "Serie", "Precio"]]
+
+precios_fondos_df = pd.concat([precios_fondos_df, temp_precios_fondos_df], axis=0, ignore_index=True)
+precios_fondos_df = precios_fondos_df[["Fecha", "Fondo", "Precio"]].pivot(index="Fecha", columns="Fondo")
+precios_fondos_df = precios_fondos_df.droplevel(level=0, axis=1)
+precios_fondos_df.columns.name = None
+
 fecha = datetime.today()
 fecha = datetime(year=fecha.year, month=fecha.month, day=fecha.day)
 
@@ -342,32 +488,10 @@ st.write(precios_bmks_df)
 # st.write(fechas_habiles_iniciales_rv)
 # st.write(propiedades_fondos_df)
 
-# rendimientos_bmks_df = pd.DataFrame()
-# for ventana in fechas_habiles_iniciales_rv.keys():
-#     rendimientos_bmk_ventana = []
-#     for fondo in fondo2benchmark.keys():
-#         tipo_fondo = propiedades_fondos_df.loc[propiedades_fondos_df["Fondo"] == fondo, "Tipo"].item()
-#         fechas_habiles_iniciales = fechas_habiles_iniciales_rv if tipo_fondo == "RV" else fechas_habiles_iniciales_rf
-
-#         fecha_inicial = (fechas_habiles_iniciales[ventana] - bmv_offset).to_pydatetime()
-#         fecha_final = (fecha - bmv_offset).to_pydatetime()
-
-#         bmks = fondo2benchmark[fondo]["Benchmarks"]
-#         pesos = fondo2benchmark[fondo]["Pesos"]
-#         rendimiento_bmk = ((precios_bmks_df[bmks].loc[fecha_final]/precios_bmks_df[bmks].loc[fecha_inicial] - 1) * pesos).sum()
-
-#         if len(bmks) == 0:
-#             rendimiento_bmk = np.nan
-        
-#         if tipo_fondo == "RF":
-#             rendimiento_bmk = rendimiento_bmk * 360/(fecha - fechas_habiles_iniciales[ventana]).days
-
-#         rendimientos_bmk_ventana.append(rendimiento_bmk)
-
-#     rendimientos_bmk_ventana_df = pd.DataFrame({ventana:rendimientos_bmk_ventana}, index=fondo2benchmark.keys())
-#     rendimientos_bmks_df = pd.concat([rendimientos_bmks_df, rendimientos_bmk_ventana_df], axis=1)
-
 rendimientos_bmks_df = formatea_rendimientos_bmk(fecha, precios_bmks_df, fechas_habiles_iniciales_rf, fechas_habiles_iniciales_rv, propiedades_fondos_df, bmv_offset, fondo2benchmark)
 
-
 st.write(rendimientos_bmks_df)
+
+rendimientos_df = formatea_rendimientos_fondos(fecha, precios_fondos_df, fechas_habiles_iniciales_rf, fechas_habiles_iniciales_rv, propiedades_fondos_df)
+
+st.write(rendimientos_df)
