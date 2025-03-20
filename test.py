@@ -311,7 +311,7 @@ precios_bmks_df = formatea_precios_bmks(fecha)
 
 st.write(precios_bmks_df)
 # st.write(fechas_habiles_iniciales_rf)
-# st.write(fechas_habiles_iniciales_rv)
+st.write(fechas_habiles_iniciales_rv)
 # st.write(propiedades_fondos_df)
 
 rendimientos_bmks_df = pd.DataFrame()
