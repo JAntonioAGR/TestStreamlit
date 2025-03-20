@@ -311,7 +311,7 @@ precios_bmks_df = formatea_precios_bmks(fecha)
 
 st.write(precios_bmks_df)
 # st.write(fechas_habiles_iniciales_rf)
-st.write(fechas_habiles_iniciales_rv)
+# st.write(fechas_habiles_iniciales_rv)
 # st.write(propiedades_fondos_df)
 
 rendimientos_bmks_df = pd.DataFrame()
@@ -331,8 +331,8 @@ for ventana in fechas_habiles_iniciales_rv.keys():
         if len(bmks) == 0:
             rendimiento_bmk = np.nan
         
-        if tipo_fondo == "RF":
-            rendimiento_bmk = rendimiento_bmk * 360/(fecha - fechas_habiles_iniciales[ventana]).days
+        # if tipo_fondo == "RF":
+        #     rendimiento_bmk = rendimiento_bmk * 360/(fecha - fechas_habiles_iniciales[ventana]).days
 
         rendimientos_bmk_ventana.append(rendimiento_bmk)
 
