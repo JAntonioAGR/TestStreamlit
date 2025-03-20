@@ -140,7 +140,8 @@ def calcula_fechas_habiles_iniciales(fechas_exactas_iniciales, fechas_bmv, bmv_o
     
     else:
         fechas_habiles_iniciales = {
-            ventana:calcula_fecha_habil_proxima_posterior(fechas_exactas_iniciales[ventana] + timedelta(days=1 if ventana in ["MTD", "YTD"] else 0), fechas_bmv, bmv_offset) for ventana in fechas_exactas_iniciales.keys()
+            ventana:calcula_fecha_habil_proxima_posterior(fechas_exactas_iniciales[ventana] + timedelta(days=1), fechas_bmv, bmv_offset) if ventana in ["MTD", "YTD"] else
+            calcula_fecha_habil_proxima_anterior(fechas_exactas_iniciales[ventana] + timedelta(days=1), fechas_bmv, bmv_offset) for ventana in fechas_exactas_iniciales.keys()
         }
 
     return fechas_habiles_iniciales
