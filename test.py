@@ -318,7 +318,10 @@ rendimientos_bmks_df = pd.DataFrame()
 for ventana in fechas_habiles_iniciales_rv.keys():
     rendimientos_bmk_ventana = []
     for fondo in fondo2benchmark.keys():
-        fecha_inicial = (fechas_habiles_iniciales_rv[ventana] - bmv_offset).to_pydatetime()
+        tipo_fondo = propiedades_fondos_df.loc[propiedades_fondos_df["Fondo"] == fondo, "Tipo"].item()
+        fechas_habiles_iniciales = fechas_habiles_iniciales_rv if tipo_fondo == "RV" else fechas_habiles_iniciales_rf
+
+        fecha_inicial = (fechas_habiles_iniciales[ventana] - bmv_offset).to_pydatetime()
         fecha_final = (fecha - bmv_offset).to_pydatetime()
 
         bmks = fondo2benchmark[fondo]["Benchmarks"]
@@ -327,9 +330,9 @@ for ventana in fechas_habiles_iniciales_rv.keys():
 
         if len(bmks) == 0:
             rendimiento_bmk = np.nan
-
-        if fondo == "VECTUSA" and ventana == "MTD":
-            st.write(propiedades_fondos_df.loc[propiedades_fondos_df["Fondo"] == fondo, "Tipo"].item())
+        
+        if tipo_fondo == "RF":
+            rendimiento_bmk = rendimiento_bmk * 360/(fecha - fechas_habiles_iniciales[ventana]).days
 
         rendimientos_bmk_ventana.append(rendimiento_bmk)
 
