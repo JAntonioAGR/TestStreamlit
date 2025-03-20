@@ -321,15 +321,15 @@ for ventana in fechas_habiles_iniciales_rv.keys():
         fecha_inicial = (fechas_habiles_iniciales_rv[ventana] - bmv_offset).to_pydatetime()
         fecha_final = (fecha - bmv_offset).to_pydatetime()
 
-        if fondo == "VECTUSA" and ventana == "30D":
-            st.write(fecha_inicial)
-            st.write(fecha_final)
-
         bmks = fondo2benchmark[fondo]["Benchmarks"]
         pesos = fondo2benchmark[fondo]["Pesos"]
         rendimiento_bmk = ((precios_bmks_df[bmks].loc[fecha_final]/precios_bmks_df[bmks].loc[fecha_inicial] - 1) * pesos).sum()
+
         if len(bmks) == 0:
             rendimiento_bmk = np.nan
+
+        if fondo == "VECTUSA" and ventana == "MTD":
+            st.write(propiedades_fondos_df.loc[propiedades_fondos_df["Fondo"] == fondo, "Tipo"].item())
 
         rendimientos_bmk_ventana.append(rendimiento_bmk)
 
