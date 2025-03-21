@@ -170,7 +170,7 @@ def formatea_rendimientos_bmk(fecha, precios_bmks_df, fechas_habiles_iniciales_r
             if len(bmks) == 0:
                 rendimiento_bmk = np.nan
             
-            if tipo_fondo == "RF":
+            if tipo_fondo == "RF" or fondo in ["BALANCE", "DYNAMIC"]:
                 rendimiento_bmk = rendimiento_bmk * 360/(fecha - fechas_habiles_iniciales[ventana]).days
 
             rendimientos_bmk_ventana.append(rendimiento_bmk)
