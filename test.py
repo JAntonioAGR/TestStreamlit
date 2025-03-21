@@ -501,6 +501,9 @@ rendimientos_fondos_df.rename(columns={"index":"Fondo"}, inplace=True)
 
 rendimientos_df = pd.merge(rendimientos_fondos_df, rendimientos_bmks_df, on="Fondo")
 rendimientos_df = rendimientos_df[["Fondo"] + sum([[col, f"BMK_{col}"] for col in fechas_exactas_iniciales_rf.keys()], [])]
+rendimientos_df.set_index("Fondo", inplace=True)
+rendimientos_df *= 100
+rendimientos_df = rendimientos_df.round(decimals=2)
 
 st.write(rendimientos_df)
 
