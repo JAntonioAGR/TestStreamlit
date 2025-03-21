@@ -194,7 +194,7 @@ def formatea_rendimientos_fondos(fecha, precios_fondos_df, fechas_habiles_inicia
 
     fondos_a_anualizar = propiedades_fondos_df.loc[propiedades_fondos_df["Tipo"] == "RF", "Fondo"].tolist() + ["BALANCE", "DYNAMIC"]
     temp_rendimientos_df = rendimientos_df.loc[fondos_a_anualizar].copy()
-    temp_rendimientos_df = calcula_rendimientos_anualizados(temp_rendimientos_df, fecha, fechas_habiles_iniciales)
+    temp_rendimientos_df = calcula_rendimientos_anualizados(temp_rendimientos_df, fecha, fechas_habiles_iniciales_rf)
     rendimientos_df.loc[fondos_a_anualizar] = temp_rendimientos_df.copy()
 
     return rendimientos_df
@@ -257,9 +257,9 @@ def calcula_rendimientos_fondos(precios_fondos_df, fondos, fecha, fechas_habiles
     for ventana in fechas_habiles_iniciales.keys():
         fecha_ventana = fechas_habiles_iniciales[ventana]
         rendimientos_ventana_df = precios_fondos_df.loc[fecha, fondos]/precios_fondos_df.loc[fecha_ventana, fondos] - 1
-        if "VECTRF" in fondos:
-            st.write(ventana)
-            st.write(rendimientos_ventana_df)
+        # if "VECTRF" in fondos:
+        #     st.write(ventana)
+        #     st.write(rendimientos_ventana_df)
         rendimientos_ventana_df.name = ventana
         rendimientos_ventana_df = rendimientos_ventana_df.to_frame()
         rendimientos_df = pd.concat([rendimientos_df, rendimientos_ventana_df], axis=1)
