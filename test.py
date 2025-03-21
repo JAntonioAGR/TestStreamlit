@@ -505,5 +505,5 @@ rendimientos_df.set_index("Fondo", inplace=True)
 rendimientos_df *= 100
 rendimientos_df = rendimientos_df.round(decimals=2)
 
-st.write(rendimientos_df.style.format("{:.2}"))
+st.write(rendimientos_df.style.format("{:.2f}"))
 
