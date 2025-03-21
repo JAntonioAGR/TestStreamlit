@@ -258,8 +258,8 @@ def calcula_rendimientos_fondos(precios_fondos_df, fondos, fecha, fechas_habiles
         fecha_ventana = fechas_habiles_iniciales[ventana]
         rendimientos_ventana_df = precios_fondos_df.loc[fecha, fondos]/precios_fondos_df.loc[fecha_ventana, fondos] - 1
         if "VECTRF" in fondos:
-            print(ventana)
-            print(rendimientos_ventana_df)
+            st.write(ventana)
+            st.write(rendimientos_ventana_df)
         rendimientos_ventana_df.name = ventana
         rendimientos_ventana_df = rendimientos_ventana_df.to_frame()
         rendimientos_df = pd.concat([rendimientos_df, rendimientos_ventana_df], axis=1)
