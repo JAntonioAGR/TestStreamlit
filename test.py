@@ -497,6 +497,7 @@ rendimientos_fondos_df.reset_index(inplace=True)
 rendimientos_fondos_df.rename(columns={"index":"Fondo"}, inplace=True)
 
 rendimientos_df = pd.merge(rendimientos_fondos_df, rendimientos_bmks_df, on="Fondo")
+rendimientos_df = rendimientos_df[["Fondo"] + sum([[col, f"BMK_{col}"] for col in fechas_exactas_iniciales_rf.keys()], [])]
 
 st.write(rendimientos_df)
 
