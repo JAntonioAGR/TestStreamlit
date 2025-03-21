@@ -483,15 +483,17 @@ fechas_habiles_iniciales_rv = calcula_fechas_habiles_iniciales(fechas_exactas_in
 
 precios_bmks_df = formatea_precios_bmks(fecha)
 
-st.write(precios_bmks_df)
+# st.write(precios_bmks_df)
 # st.write(fechas_habiles_iniciales_rf)
 # st.write(fechas_habiles_iniciales_rv)
 # st.write(propiedades_fondos_df)
 
 rendimientos_bmks_df = formatea_rendimientos_bmk(fecha, precios_bmks_df, fechas_habiles_iniciales_rf, fechas_habiles_iniciales_rv, propiedades_fondos_df, bmv_offset, fondo2benchmark)
+rendimientos_bmks_df.reset_index(inplace=True)
 
 st.write(rendimientos_bmks_df)
 
 rendimientos_fondos_df = formatea_rendimientos_fondos(fecha, precios_fondos_df, fechas_habiles_iniciales_rf, fechas_habiles_iniciales_rv, propiedades_fondos_df)
 
-st.write(rendimientos_fondos_df)
+# st.write(rendimientos_fondos_df)
+
