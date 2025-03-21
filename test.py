@@ -490,6 +490,7 @@ precios_bmks_df = formatea_precios_bmks(fecha)
 
 rendimientos_bmks_df = formatea_rendimientos_bmk(fecha, precios_bmks_df, fechas_habiles_iniciales_rf, fechas_habiles_iniciales_rv, propiedades_fondos_df, bmv_offset, fondo2benchmark)
 rendimientos_bmks_df.reset_index(inplace=True)
+rendimientos_bmks_df.rename(columns={"index":"Fondo"}, inplace=True)
 
 st.write(rendimientos_bmks_df)
 
