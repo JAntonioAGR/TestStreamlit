@@ -492,9 +492,11 @@ rendimientos_bmks_df = formatea_rendimientos_bmk(fecha, precios_bmks_df, fechas_
 rendimientos_bmks_df.reset_index(inplace=True)
 rendimientos_bmks_df.rename(columns={"index":"Fondo"}|{col:f"BMK_{col}" for col in rendimientos_bmks_df.columns if col != "index"}, inplace=True)
 
-st.write(rendimientos_bmks_df)
-
 rendimientos_fondos_df = formatea_rendimientos_fondos(fecha, precios_fondos_df, fechas_habiles_iniciales_rf, fechas_habiles_iniciales_rv, propiedades_fondos_df)
+rendimientos_fondos_df.reset_index(inplace=True)
+rendimientos_fondos_df.rename(columns={"index":"Fondo"}, inplace=True)
 
-# st.write(rendimientos_fondos_df)
+rendimientos_df = pd.merge(rendimientos_fondos_df, rendimientos_bmks_df, on="Fondo")
+
+st.write(rendimientos_df)
 
