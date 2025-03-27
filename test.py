@@ -507,3 +507,7 @@ rendimientos_df = rendimientos_df.round(decimals=2)
 
 st.write(rendimientos_df.style.format("{:.2f}"))
 
+st.write(precios_bmks_df)
+
+st.write(precios_fondos_df)
+
