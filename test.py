@@ -515,6 +515,7 @@ fondo = st.selectbox(
 )
 
 st.write(precios_bmks_df)
+st.write("HOle")
 
 st.write(precios_fondos_df)
 
