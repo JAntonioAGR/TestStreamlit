@@ -388,10 +388,9 @@ fondo2benchmark = {
     },
     "EQUITY":{
         "Benchmarks":[
-            "ACWI", 
-            "IPC"
+            "ACWI"
         ],
-        "Pesos":[0.5, 0.5]
+        "Pesos":[1.0]
     },
     "BALANCE":{
         "Benchmarks":[
@@ -467,7 +466,7 @@ fecha = datetime(year=fecha.year, month=fecha.month, day=fecha.day)
 
 xmex = xcals.get_calendar("XMEX")
 fechas_bmv = sorted(xmex.sessions_in_range(
-    start=(datetime.today() - relativedelta(years=20) + timedelta(days=3)).strftime("%Y-%m-%d"), 
+    start=(datetime.today() - relativedelta(years=20) + timedelta(days=100)).strftime("%Y-%m-%d"), 
     end=datetime.today().strftime("%Y-%m-%d")
 ).to_pydatetime())
 fechas_bmv.remove(datetime(2024, 10, 1, 0, 0))
@@ -487,6 +486,7 @@ fechas_habiles_iniciales_rv = calcula_fechas_habiles_iniciales(fechas_exactas_in
 precios_bmks_df = formatea_precios_bmks(fecha)
 
 # st.write(precios_fondos_df)
+# st.write(precios_bmks_df)
 # st.write(fechas_habiles_iniciales_rf)
 # st.write(fechas_habiles_iniciales_rv)
 # st.write(propiedades_fondos_df)
