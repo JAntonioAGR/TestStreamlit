@@ -507,6 +507,13 @@ rendimientos_df = rendimientos_df.round(decimals=2)
 
 st.write(rendimientos_df.style.format("{:.2f}"))
 
+st.subheader("Rendimientos Históricos VS Benchmark")
+
+fondo = st.selectbox(
+    "Seleccione un fondo de Vector",
+    tuple(rendimientos_fondos_df.columns)
+)
+
 st.write(precios_bmks_df)
 
 st.write(precios_fondos_df)
