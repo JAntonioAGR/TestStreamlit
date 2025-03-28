@@ -520,3 +520,5 @@ fondo = st.selectbox(
 
 st.write(pd.merge(precios_fondos_df[fondo].reset_index(), precios_bmks_df[fondo2benchmark[fondo]["Benchmarks"]].reset_index(), on="Fecha", how="left"))
 
+st.write("ok")
+
