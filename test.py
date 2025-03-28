@@ -511,7 +511,7 @@ st.subheader("Rendimientos Históricos VS Benchmark")
 
 fondo = st.selectbox(
     "Seleccione un fondo de Vector",
-    tuple(rendimientos_fondos_df.index)
+    tuple(rendimientos_fondos_df["Fondo"].unique())
 )
 
 st.write(precios_bmks_df)
