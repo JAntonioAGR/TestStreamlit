@@ -514,7 +514,7 @@ fondo = st.selectbox(
     tuple(rendimientos_fondos_df["Fondo"].unique())
 )
 
-st.write(precios_bmks_df[fondo2benchmark[fondo]])
+st.write(precios_bmks_df[fondo2benchmark[fondo]["Benchmarks"]])
 
 st.write(precios_fondos_df[fondo])
 
