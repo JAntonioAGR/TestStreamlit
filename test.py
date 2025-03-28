@@ -514,7 +514,9 @@ fondo = st.selectbox(
     tuple(rendimientos_fondos_df["Fondo"].unique())
 )
 
-st.write(precios_bmks_df[fondo2benchmark[fondo]["Benchmarks"]].pct_change())
+#st.write(precios_bmks_df[fondo2benchmark[fondo]["Benchmarks"]])
 
-st.write(precios_fondos_df[fondo].pct_change())
+#st.write(precios_fondos_df[fondo])
+
+st.write(pd.merge(precios_fondos_df[fondo].reset_index(), precios_bmks_df[fondo2benchmark[fondo]["Benchmarks"]].reset_index(), on="Fecha", how="left"))
 
