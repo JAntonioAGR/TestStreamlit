@@ -539,6 +539,17 @@ fecha_final_grafica_rendimientos_historicos = st.date_input(
     max_value=rendimientos_fondo_bmks_df.index.max()
 )
 
+fecha_inicial_grafica_rendimientos_historicos = datetime(
+    year=fecha_inicial_grafica_rendimientos_historicos.year,
+    month=fecha_inicial_grafica_rendimientos_historicos.month,
+    day=fecha_inicial_grafica_rendimientos_historicos.day
+)
+fecha_inicial_grafica_rendimientos_historicos = datetime(
+    year=fecha_inicial_grafica_rendimientos_historicos.year,
+    month=fecha_inicial_grafica_rendimientos_historicos.month,
+    day=fecha_inicial_grafica_rendimientos_historicos.day
+)
+
 rendimientos_fondo_bmks_df = rendimientos_fondo_bmks_df.loc[
     (rendimientos_fondo_bmks_df.index >= fecha_inicial_grafica_rendimientos_historicos) &
     (rendimientos_fondo_bmks_df.index <= fecha_final_grafica_rendimientos_historicos)
