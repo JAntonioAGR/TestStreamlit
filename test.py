@@ -555,6 +555,7 @@ rendimientos_fondo_bmks_df = rendimientos_fondo_bmks_df.loc[
     (rendimientos_fondo_bmks_df.index <= fecha_final_grafica_rendimientos_historicos)
 ]
 st.write(rendimientos_fondo_bmks_df)
+st.write(precios_bmks_df)
 
 st.write("oks")
 
