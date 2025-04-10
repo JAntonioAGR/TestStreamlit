@@ -520,6 +520,7 @@ fondo = st.selectbox(
 precios_fondo_bmks_df = pd.merge(precios_fondos_df[fondo].reset_index(), precios_bmks_df[fondo2benchmark[fondo]["Benchmarks"]].reset_index(), on="Fecha", how="left")
 precios_fondo_bmks_df.set_index("Fecha", inplace=True)
 rendimientos_fondo_bmks_df = precios_fondo_bmks_df.pct_change()
+st.write(rendimientos_fondo_bmks_df)
 rendimientos_bmk_srs = pd.Series(0, index=rendimientos_fondo_bmks_df.index)
 for i, bmk in enumerate(fondo2benchmark[fondo]["Benchmarks"]):
     rendimientos_bmk_srs += fondo2benchmark[fondo]["Pesos"] * rendimientos_fondo_bmks_df[bmk]
