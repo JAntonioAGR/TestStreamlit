@@ -523,6 +523,15 @@ rendimientos_fondo_bmks_df = precios_fondo_bmks_df.pct_change()
 rendimientos_fondo_bmks_df["BMK"] = (rendimientos_fondo_bmks_df[fondo2benchmark[fondo]["Benchmarks"]] * fondo2benchmark[fondo]["Pesos"]).sum(axis=1)
 rendimientos_fondo_bmks_df.dropna(inplace=True)
 rendimientos_fondo_bmks_df = rendimientos_fondo_bmks_df[[fondo, "BMK"]]
+
+fecha_inicial_grafica_rendimientos_historicos = st.date_input(
+    "Seleccione una fecha inicial:",
+    value=rendimientos_fondo_bmks_df.index.max(),
+    min_value=rendimientos_fondo_bmks_df.index.min(),
+    max_value=rendimientos_fondo_bmks_df.index.max()
+)
+
+
 st.write(rendimientos_fondo_bmks_df)
 
 st.write("ok")
