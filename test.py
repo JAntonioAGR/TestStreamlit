@@ -533,6 +533,7 @@ fecha_inicial_grafica_rendimientos_historicos = st.date_input(
 
 
 st.write(rendimientos_fondo_bmks_df)
+st.write(precios_bmks_df)
 
 st.write("ok")
 
