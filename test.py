@@ -556,6 +556,6 @@ rendimientos_fondo_bmks_df = rendimientos_fondo_bmks_df.loc[
 ]
 st.write(rendimientos_fondo_bmks_df)
 st.write(precios_bmks_df)
-
+st.write("JI")
 st.write("ok")
 
