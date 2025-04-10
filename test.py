@@ -544,10 +544,10 @@ fecha_inicial_grafica_rendimientos_historicos = datetime(
     month=fecha_inicial_grafica_rendimientos_historicos.month,
     day=fecha_inicial_grafica_rendimientos_historicos.day
 )
-fecha_inicial_grafica_rendimientos_historicos = datetime(
-    year=fecha_inicial_grafica_rendimientos_historicos.year,
-    month=fecha_inicial_grafica_rendimientos_historicos.month,
-    day=fecha_inicial_grafica_rendimientos_historicos.day
+fecha_final_grafica_rendimientos_historicos = datetime(
+    year=fecha_final_grafica_rendimientos_historicos.year,
+    month=fecha_final_grafica_rendimientos_historicos.month,
+    day=fecha_final_grafica_rendimientos_historicos.day
 )
 
 rendimientos_fondo_bmks_df = rendimientos_fondo_bmks_df.loc[
