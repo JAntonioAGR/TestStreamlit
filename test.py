@@ -518,8 +518,8 @@ fondo = st.selectbox(
 #st.write(precios_fondos_df[fondo])
 
 precios_fondo_bmks_df = pd.merge(precios_fondos_df[fondo].reset_index(), precios_bmks_df[fondo2benchmark[fondo]["Benchmarks"]].reset_index(), on="Fecha", how="left")
-precios_fondo_bmks_df.set_index("Fecha", inplace=True)
 precios_fondo_bmks_df[fondo2benchmark[fondo]["Benchmarks"]] = precios_fondo_bmks_df[fondo2benchmark[fondo]["Benchmarks"]].shift(1)
+precios_fondo_bmks_df.set_index("Fecha", inplace=True)
 rendimientos_fondo_bmks_df = precios_fondo_bmks_df.reset_index()
 #rendimientos_fondo_bmks_df[[fondo] + fondo2benchmark[fondo]["Benchmarks"]] = rendimientos_fondo_bmks_df[[fondo] + fondo2benchmark[fondo]["Benchmarks"]].pct_change()
 st.write(rendimientos_fondo_bmks_df)
