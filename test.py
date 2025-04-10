@@ -522,7 +522,6 @@ precios_fondo_bmks_df[fondo2benchmark[fondo]["Benchmarks"]] = precios_fondo_bmks
 precios_fondo_bmks_df.set_index("Fecha", inplace=True)
 rendimientos_fondo_bmks_df = precios_fondo_bmks_df.reset_index()
 rendimientos_fondo_bmks_df[[fondo] + fondo2benchmark[fondo]["Benchmarks"]] = rendimientos_fondo_bmks_df[[fondo] + fondo2benchmark[fondo]["Benchmarks"]].pct_change()
-st.write(rendimientos_fondo_bmks_df)
 rendimientos_fondo_bmks_df["BMK"] = (rendimientos_fondo_bmks_df[fondo2benchmark[fondo]["Benchmarks"]] * fondo2benchmark[fondo]["Pesos"]).sum(axis=1)
 rendimientos_fondo_bmks_df.dropna(inplace=True)
 rendimientos_fondo_bmks_df = rendimientos_fondo_bmks_df[[fondo, "BMK"]]
@@ -551,6 +550,9 @@ fecha_final_grafica_rendimientos_historicos = datetime(
     month=fecha_final_grafica_rendimientos_historicos.month,
     day=fecha_final_grafica_rendimientos_historicos.day
 )
+
+st.write(fecha_inicial_grafica_rendimientos_historicos)
+st.write(fecha_final_grafica_rendimientos_historicos)
 
 rendimientos_fondo_bmks_df = rendimientos_fondo_bmks_df.loc[
     (rendimientos_fondo_bmks_df.index >= fecha_inicial_grafica_rendimientos_historicos) &
