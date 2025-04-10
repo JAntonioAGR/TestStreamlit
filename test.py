@@ -526,5 +526,5 @@ for i, bmk in enumerate(fondo2benchmark[fondo]["Benchmarks"]):
 rendimientos_fondo_bmks_df["BMK"] = rendimientos_bmk_srs.copy()
 st.write(precios_fondo_bmks_df)
 
-st.write("ok")
+st.write("oks")
 
