@@ -524,7 +524,7 @@ rendimientos_bmk_srs = pd.Series(index=rendimientos_fondo_bmks_df.index)
 for i, bmk in enumerate(fondo2benchmark[fondo]["Benchmarks"]):
     rendimientos_bmk_srs += fondo2benchmark[fondo]["Pesos"] * rendimientos_fondo_bmks_df[bmk]
 rendimientos_fondo_bmks_df["BMK"] = rendimientos_bmk_srs.copy()
-st.write(precios_fondo_bmks_df)
+st.write(rendimientos_fondo_bmks_df)
 
 st.write("oks")
 
