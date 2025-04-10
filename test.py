@@ -527,5 +527,5 @@ st.write(rendimientos_fondo_bmks_df)
 # rendimientos_fondo_bmks_df["BMK"] = rendimientos_bmk_srs.copy()
 st.write((rendimientos_fondo_bmks_df[fondo2benchmark[fondo]["Benchmarks"]] * fondo2benchmark[fondo]["Pesos"]).sum(axis=1))
 
-st.write("oks")
+st.write("ok")
 
