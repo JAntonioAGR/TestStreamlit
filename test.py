@@ -527,14 +527,23 @@ rendimientos_fondo_bmks_df = rendimientos_fondo_bmks_df[[fondo, "BMK"]]
 
 fecha_inicial_grafica_rendimientos_historicos = st.date_input(
     "Seleccione una fecha inicial:",
+    value=rendimientos_fondo_bmks_df.index.min(),
+    min_value=rendimientos_fondo_bmks_df.index.min(),
+    max_value=rendimientos_fondo_bmks_df.index.max()
+)
+
+fecha_final_grafica_rendimientos_historicos = st.date_input(
+    "Seleccione una fecha inicial:",
     value=rendimientos_fondo_bmks_df.index.max(),
     min_value=rendimientos_fondo_bmks_df.index.min(),
     max_value=rendimientos_fondo_bmks_df.index.max()
 )
 
-
+rendimientos_fondo_bmks_df = rendimientos_fondo_bmks_df.loc[
+    (rendimientos_fondo_bmks_df.index >= fecha_inicial_grafica_rendimientos_historicos) &
+    (rendimientos_fondo_bmks_df.index <= fecha_final_grafica_rendimientos_historicos)
+]
 st.write(rendimientos_fondo_bmks_df)
-st.write(precios_fondo_bmks_df)
 
 st.write("oks")
 
