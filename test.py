@@ -525,7 +525,7 @@ st.write(rendimientos_fondo_bmks_df)
 # for i, bmk in enumerate(fondo2benchmark[fondo]["Benchmarks"]):
 #     rendimientos_bmk_srs += fondo2benchmark[fondo]["Pesos"][] * rendimientos_fondo_bmks_df[bmk]
 # rendimientos_fondo_bmks_df["BMK"] = rendimientos_bmk_srs.copy()
-st.write(rendimientos_fondo_bmks_df[fondo2benchmark[fondo]["Benchmarks"]] * fondo2benchmark[fondo]["Pesos"])
+st.write((rendimientos_fondo_bmks_df[fondo2benchmark[fondo]["Benchmarks"]] * fondo2benchmark[fondo]["Pesos"]).sum(axis=1))
 
 st.write("oks")
 
