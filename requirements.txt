@@ -3,3 +3,4 @@ openpyxl
 exchange_calendars
 selenium
 lxml
+Authlib
