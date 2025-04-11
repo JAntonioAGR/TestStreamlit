@@ -431,6 +431,10 @@ fondo2benchmark = {
     }
 }
 
+if not st.experimental_user.is_logged_in:
+    if st.button("Log in"):
+        st.login()
+
 bmks_rv = ["^MXX", "^SPESG", "^SPGSCI", "^GSPC", "^NDX"]
 
 propiedades_fondos_path = "./ArchivosRendimientos/PropiedadesFondos"
