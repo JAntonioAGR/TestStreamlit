@@ -456,7 +456,7 @@ else:
         pd.Series(list(zip(precios_fondos_df["Fondo"], precios_fondos_df["Serie"]))).isin(list(zip(propiedades_fondos_df["Fondo"], propiedades_fondos_df["Serie"])))
     ].reset_index(drop=True)
 
-    fechas = [datetime.today()]
+    fechas = [datetime.today() - timedelta(days=2)]
     temp_precios_fondos_df = descarga_rendimientos_MiVector(fechas)
     temp_precios_fondos_df = temp_precios_fondos_df[
         pd.Series(list(zip(temp_precios_fondos_df["Fondo"], temp_precios_fondos_df["Serie"]))).isin(list(zip(propiedades_fondos_df["Fondo"], propiedades_fondos_df["Serie"])))
@@ -468,7 +468,7 @@ else:
     precios_fondos_df = precios_fondos_df.droplevel(level=0, axis=1)
     precios_fondos_df.columns.name = None
 
-    fecha = datetime.today()
+    fecha = datetime.today() - timedelta(days=2)
     fecha = datetime(year=fecha.year, month=fecha.month, day=fecha.day)
 
     xmex = xcals.get_calendar("XMEX")
