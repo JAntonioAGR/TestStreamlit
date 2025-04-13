@@ -438,6 +438,8 @@ if not st.experimental_user.is_logged_in:
     st.write(st.experimental_user)
 else:
 
+    st.write(st.experimental_user)  
+
     bmks_rv = ["^MXX", "^SPESG", "^SPGSCI", "^GSPC", "^NDX"]
 
     propiedades_fondos_path = "./ArchivosRendimientos/PropiedadesFondos"
