@@ -435,7 +435,7 @@ if not st.experimental_user.is_logged_in:
     if st.button("Log in"):
         st.login()
     
-    st.write(st.experimental_user.email)
+    st.write(st.experimental_user)
 else:
 
     bmks_rv = ["^MXX", "^SPESG", "^SPGSCI", "^GSPC", "^NDX"]
