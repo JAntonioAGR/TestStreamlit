@@ -702,7 +702,7 @@ precios_indizados_fondo_bmks_df_vis *= 100
 precios_indizados_fondo_bmks_df_vis.reset_index(inplace=True)
 precios_indizados_fondo_bmks_df_vis = precios_indizados_fondo_bmks_df_vis.melt(id_vars="Fecha", value_name="Rendimiento (%)", var_name="Portafolio")
 
-st.write(precios_indizados_fondo_bmks_df)
+st.write(precios_indizados_fondo_bmks_df_vis)
 
 # fig = px.line(rendimientos_fondo_bmks_vis_df, x="Fecha", y="Rendimiento", color="Portafolio")
 # st.plotly_chart(fig)
