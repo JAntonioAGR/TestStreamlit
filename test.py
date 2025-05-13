@@ -692,13 +692,17 @@ fecha_final_grafica_rendimientos_historicos = datetime(
     day=fecha_final_grafica_rendimientos_historicos.day
 )
 
-rendimientos_fondo_bmks_df = precios_fondo_bmks_df.loc[
+precios_indizados_fondo_bmks_df = precios_fondo_bmks_df.loc[
     (precios_fondo_bmks_df.index >= fecha_inicial_grafica_rendimientos_historicos) &
     (precios_fondo_bmks_df.index <= fecha_final_grafica_rendimientos_historicos)
 ]
-rendimientos_fondo_bmks_df = rendimientos_fondo_bmks_df.div(rendimientos_fondo_bmks_df.loc[fecha_inicial_grafica_rendimientos_historicos], axis=1)
+precios_indizados_fondo_bmks_df = precios_indizados_fondo_bmks_df.div(precios_indizados_fondo_bmks_df.loc[fecha_inicial_grafica_rendimientos_historicos], axis=1) - 1
+precios_indizados_fondo_bmks_df_vis = precios_indizados_fondo_bmks_df.copy()
+precios_indizados_fondo_bmks_df_vis *= 100
+precios_indizados_fondo_bmks_df_vis.reset_index(inplace=True)
+precios_indizados_fondo_bmks_df_vis = precios_indizados_fondo_bmks_df_vis.melt(id_vars="Fecha", value_name="Rendimiento (%)", var_name="Portafolio")
 
-st.write(rendimientos_fondo_bmks_df)
+st.write(precios_indizados_fondo_bmks_df)
 
 # fig = px.line(rendimientos_fondo_bmks_vis_df, x="Fecha", y="Rendimiento", color="Portafolio")
 # st.plotly_chart(fig)
