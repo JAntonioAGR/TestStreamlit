@@ -713,6 +713,6 @@ for data in temp_fig["data"]:
     
     fig.add_trace(go.Line(data))
 
-st.plotly_chart(fig)
 st.write(temp_fig["data"])
+st.plotly_chart(fig)
 
