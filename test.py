@@ -704,6 +704,6 @@ precios_indizados_fondo_bmks_df_vis = precios_indizados_fondo_bmks_df_vis.melt(i
 
 st.write(precios_indizados_fondo_bmks_df_vis)
 
-# fig = px.line(rendimientos_fondo_bmks_vis_df, x="Fecha", y="Rendimiento", color="Portafolio")
-# st.plotly_chart(fig)
+fig = px.line(precios_indizados_fondo_bmks_df_vis, x="Fecha", y="Rendimiento (%)", color="Portafolio")
+st.plotly_chart(fig)
 
