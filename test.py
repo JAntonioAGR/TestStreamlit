@@ -699,6 +699,6 @@ rendimientos_fondo_bmks_df = rendimientos_fondo_bmks_df.melt(id_vars="Fecha", va
 rendimientos_fondo_bmks_vis_df = rendimientos_fondo_bmks_df.copy()
 rendimientos_fondo_bmks_vis_df["Rendimiento"] *= 100
 
-fig = px.line(rendimientos_fondo_bmks_df, x="Fecha", y="Rendimiento", color="Portafolio")
+fig = px.line(rendimientos_fondo_bmks_vis_df, x="Fecha", y="Rendimiento", color="Portafolio")
 st.plotly_chart(fig)
 
