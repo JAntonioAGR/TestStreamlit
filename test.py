@@ -659,9 +659,6 @@ fondo = st.selectbox(
 precios_fondo_bmks_df = pd.merge(precios_fondos_df[fondo].reset_index(), precios_bmks_df[fondo2benchmark[fondo]["Benchmarks"]].reset_index(), on="Fecha")
 precios_fondo_bmks_df[fondo2benchmark[fondo]["Benchmarks"]] = precios_fondo_bmks_df[fondo2benchmark[fondo]["Benchmarks"]].shift(1)
 precios_fondo_bmks_df.set_index("Fecha", inplace=True)
-
-st.write(precios_fondo_bmks_df)
-
 # rendimientos_fondo_bmks_df = precios_fondo_bmks_df.reset_index()
 # rendimientos_fondo_bmks_df[[fondo] + fondo2benchmark[fondo]["Benchmarks"]] = rendimientos_fondo_bmks_df[[fondo] + fondo2benchmark[fondo]["Benchmarks"]].pct_change()
 # rendimientos_fondo_bmks_df = precios_fondo_bmks_df.pct_change()
@@ -671,16 +668,16 @@ st.write(precios_fondo_bmks_df)
 
 fecha_inicial_grafica_rendimientos_historicos = st.date_input(
     "Seleccione una fecha inicial:",
-    value=rendimientos_fondo_bmks_df.index.min(),
-    min_value=rendimientos_fondo_bmks_df.index.min(),
-    max_value=rendimientos_fondo_bmks_df.index.max()
+    value=precios_fondo_bmks_df.index.min(),
+    min_value=precios_fondo_bmks_df.index.min(),
+    max_value=precios_fondo_bmks_df.index.max()
 )
 
 fecha_final_grafica_rendimientos_historicos = st.date_input(
     "Seleccione una fecha inicial:",
-    value=rendimientos_fondo_bmks_df.index.max(),
-    min_value=rendimientos_fondo_bmks_df.index.min(),
-    max_value=rendimientos_fondo_bmks_df.index.max()
+    value=precios_fondo_bmks_df.index.max(),
+    min_value=precios_fondo_bmks_df.index.min(),
+    max_value=precios_fondo_bmks_df.index.max()
 )
 
 fecha_inicial_grafica_rendimientos_historicos = datetime(
@@ -694,14 +691,13 @@ fecha_final_grafica_rendimientos_historicos = datetime(
     day=fecha_final_grafica_rendimientos_historicos.day
 )
 
-rendimientos_fondo_bmks_df = rendimientos_fondo_bmks_df.loc[
-    (rendimientos_fondo_bmks_df.index >= fecha_inicial_grafica_rendimientos_historicos) &
-    (rendimientos_fondo_bmks_df.index <= fecha_final_grafica_rendimientos_historicos)
+rendimientos_fondo_bmks_df = precios_fondo_bmks_df.loc[
+    (precios_fondo_bmks_df.index >= fecha_inicial_grafica_rendimientos_historicos) &
+    (precios_fondo_bmks_df.index <= fecha_final_grafica_rendimientos_historicos)
 ].reset_index()
-rendimientos_fondo_bmks_df = rendimientos_fondo_bmks_df.melt(id_vars="Fecha", var_name="Portafolio", value_name="Rendimiento")
-rendimientos_fondo_bmks_vis_df = rendimientos_fondo_bmks_df.copy()
-rendimientos_fondo_bmks_vis_df["Rendimiento"] *= 100
 
-fig = px.line(rendimientos_fondo_bmks_vis_df, x="Fecha", y="Rendimiento", color="Portafolio")
-st.plotly_chart(fig)
+st.write(rendimientos_fondo_bmks_df)
+
+# fig = px.line(rendimientos_fondo_bmks_vis_df, x="Fecha", y="Rendimiento", color="Portafolio")
+# st.plotly_chart(fig)
 
