@@ -587,8 +587,6 @@ precios_fondos_df = precios_fondos_df[
     pd.Series(list(zip(precios_fondos_df["Fondo"], precios_fondos_df["Serie"]))).isin(list(zip(propiedades_fondos_df["Fondo"], propiedades_fondos_df["Serie"])))
 ].reset_index(drop=True)
 
-st.write(precios_fondos_df)
-
 fechas = [datetime.today()]
 temp_precios_fondos_df = descarga_rendimientos_MiVector(fechas)
 temp_precios_fondos_df = temp_precios_fondos_df[
@@ -654,12 +652,15 @@ fondo = st.selectbox(
     tuple(rendimientos_fondos_df["Fondo"].unique())
 )
 
-st.write(precios_bmks_df[fondo2benchmark[fondo]["Benchmarks"]])
-st.write(precios_fondos_df[fondo])
+# st.write(precios_bmks_df[fondo2benchmark[fondo]["Benchmarks"]])
+# st.write(precios_fondos_df[fondo])
 
 precios_fondo_bmks_df = pd.merge(precios_fondos_df[fondo].reset_index(), precios_bmks_df[fondo2benchmark[fondo]["Benchmarks"]].reset_index(), on="Fecha")
 precios_fondo_bmks_df[fondo2benchmark[fondo]["Benchmarks"]] = precios_fondo_bmks_df[fondo2benchmark[fondo]["Benchmarks"]].shift(1)
 precios_fondo_bmks_df.set_index("Fecha", inplace=True)
+
+st.write(precios_fondo_bmks_df)
+
 # rendimientos_fondo_bmks_df = precios_fondo_bmks_df.reset_index()
 # rendimientos_fondo_bmks_df[[fondo] + fondo2benchmark[fondo]["Benchmarks"]] = rendimientos_fondo_bmks_df[[fondo] + fondo2benchmark[fondo]["Benchmarks"]].pct_change()
 rendimientos_fondo_bmks_df = precios_fondo_bmks_df.pct_change()
