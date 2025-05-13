@@ -709,9 +709,9 @@ st.write(precios_indizados_fondo_bmks_df_vis)
 fig = go.Figure()
 temp_fig = px.line(precios_indizados_fondo_bmks_df_vis, x="Fecha", y="Rendimiento (%)", color="Portafolio")
 for data in temp_fig["data"]:
-    #data["line"]["color"] = "white" if data["legendgroup"] == "BMK" else "#EC5E2A"
+    data["line"]["color"] = "white" if data["legendgroup"] == "BMK" else "#EC5E2A"
     
-    fig.add_trace(go.Line(data))
+    fig.add_trace(go.Scatter(data))
 
 st.write(temp_fig["data"])
 st.plotly_chart(fig)
