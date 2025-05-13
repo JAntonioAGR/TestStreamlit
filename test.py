@@ -432,6 +432,38 @@ def grafico_diferencias_rendimiento(rendimientos_df, periodo="MTD", titulo_adici
     
     return fig
 
+def visualiza_precios_indizados_fondo_bmk(precios_indizados_fondo_bmks_df):
+    '''
+    Description:
+        Formatea la gráfica de líneas Fecha VS Precio Indizado de un fondo y
+        su benchmark.
+    Input:
+        - precios_indizados_fondo_bmks_df: pandas.DataFrame donde el índice
+        sea la fecha y las columnas sean los rendimientos del fondo y su benchmark
+        respecto a una fecha inicial fija.
+    Output:
+        - fig: plotly.Figure con la gráfica formateada
+    '''
+    precios_indizados_fondo_bmks_df_vis = precios_indizados_fondo_bmks_df.copy()
+    precios_indizados_fondo_bmks_df_vis *= 100
+    precios_indizados_fondo_bmks_df_vis.reset_index(inplace=True)
+    precios_indizados_fondo_bmks_df_vis = precios_indizados_fondo_bmks_df_vis.melt(id_vars="Fecha", value_name="Rendimiento (%)", var_name="Portafolio")
+
+    # st.write(precios_indizados_fondo_bmks_df_vis)
+
+    fig = go.Figure()
+    temp_fig = px.line(precios_indizados_fondo_bmks_df_vis, x="Fecha", y="Rendimiento (%)", color="Portafolio")
+    for data in temp_fig["data"]:
+        data["line"]["color"] = "white" if data["legendgroup"] == "BMK" else "#EC5E2A"
+        
+        fig.add_trace(go.Scatter(data))
+
+    fig.update_xaxes(showgrid=True, linecolor='white', tickangle=90, tickfont=dict(size=15, color="white"), linewidth=4, mirror=True, title=None)
+    fig.update_yaxes(showgrid=True, gridcolor='#44475A', linecolor='white', tickfont=dict(size=17, color="white"), title=dict(text='Rendimiento (%)', font=dict(size=30, color='white')),  linewidth=4, mirror=True)
+    fig.update_layout(template="none", margin=dict(l=120, t=20, r=20, b=80), paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0.3)", legend=dict(font=dict(color="white", size=20)))
+
+    return fig
+
 fondo2benchmark = {
     "VECTUSA":{
         "Benchmarks":[
@@ -699,22 +731,23 @@ precios_indizados_fondo_bmks_df = precios_fondo_bmks_df.loc[
 precios_indizados_fondo_bmks_df = precios_indizados_fondo_bmks_df.div(precios_indizados_fondo_bmks_df.loc[fecha_inicial_grafica_rendimientos_historicos], axis=1) - 1
 precios_indizados_fondo_bmks_df["BMK"] = (precios_indizados_fondo_bmks_df[fondo2benchmark[fondo]["Benchmarks"]] * fondo2benchmark[fondo]["Pesos"]).sum(axis=1)
 precios_indizados_fondo_bmks_df = precios_indizados_fondo_bmks_df[[fondo, "BMK"]]
-precios_indizados_fondo_bmks_df_vis = precios_indizados_fondo_bmks_df.copy()
-precios_indizados_fondo_bmks_df_vis *= 100
-precios_indizados_fondo_bmks_df_vis.reset_index(inplace=True)
-precios_indizados_fondo_bmks_df_vis = precios_indizados_fondo_bmks_df_vis.melt(id_vars="Fecha", value_name="Rendimiento (%)", var_name="Portafolio")
+# precios_indizados_fondo_bmks_df_vis = precios_indizados_fondo_bmks_df.copy()
+# precios_indizados_fondo_bmks_df_vis *= 100
+# precios_indizados_fondo_bmks_df_vis.reset_index(inplace=True)
+# precios_indizados_fondo_bmks_df_vis = precios_indizados_fondo_bmks_df_vis.melt(id_vars="Fecha", value_name="Rendimiento (%)", var_name="Portafolio")
 
-# st.write(precios_indizados_fondo_bmks_df_vis)
+# # st.write(precios_indizados_fondo_bmks_df_vis)
 
-fig = go.Figure()
-temp_fig = px.line(precios_indizados_fondo_bmks_df_vis, x="Fecha", y="Rendimiento (%)", color="Portafolio")
-for data in temp_fig["data"]:
-    data["line"]["color"] = "white" if data["legendgroup"] == "BMK" else "#EC5E2A"
+# fig = go.Figure()
+# temp_fig = px.line(precios_indizados_fondo_bmks_df_vis, x="Fecha", y="Rendimiento (%)", color="Portafolio")
+# for data in temp_fig["data"]:
+#     data["line"]["color"] = "white" if data["legendgroup"] == "BMK" else "#EC5E2A"
     
-    fig.add_trace(go.Scatter(data))
+#     fig.add_trace(go.Scatter(data))
 
-fig.update_xaxes(showgrid=True, linecolor='white', tickangle=90, tickfont=dict(size=15, color="white"), linewidth=4, mirror=True, title=None)
-fig.update_yaxes(showgrid=True, gridcolor='#44475A', linecolor='white', tickfont=dict(size=17, color="white"), title=dict(text='Rendimiento (%)', font=dict(size=30, color='white')),  linewidth=4, mirror=True)
-fig.update_layout(template="none", margin=dict(l=120, t=20, r=20, b=80), paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0.3)", legend=dict(font=dict(color="white", size=20)))
-st.plotly_chart(fig)
+# fig.update_xaxes(showgrid=True, linecolor='white', tickangle=90, tickfont=dict(size=15, color="white"), linewidth=4, mirror=True, title=None)
+# fig.update_yaxes(showgrid=True, gridcolor='#44475A', linecolor='white', tickfont=dict(size=17, color="white"), title=dict(text='Rendimiento (%)', font=dict(size=30, color='white')),  linewidth=4, mirror=True)
+# fig.update_layout(template="none", margin=dict(l=120, t=20, r=20, b=80), paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0.3)", legend=dict(font=dict(color="white", size=20)))
+precios_indizados_fondo_bmk_fig = visualiza_precios_indizados_fondo_bmk(precios_indizados_fondo_bmks_df)
+st.plotly_chart(precios_indizados_fondo_bmk_fig)
 
