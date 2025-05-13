@@ -713,7 +713,7 @@ for data in temp_fig["data"]:
     
     fig.add_trace(go.Scatter(data))
 
-fig.update_xaxes(showgrid=True, linecolor='white', tickfont=dict(size=20, color="white"), linewidth=4, mirror=True, title=None)
+fig.update_xaxes(showgrid=True, linecolor='white', tickfont=dict(size=15, color="white"), linewidth=4, mirror=True, title=None)
 fig.update_yaxes(showgrid=True, gridcolor='#44475A', linecolor='white', tickfont=dict(size=17, color="white"), title=dict(font=dict(size=30, color='white')),  linewidth=4, mirror=True)
 fig.update_layout(template="none", margin=dict(l=120, t=20, r=20, b=80), paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0.3)", legend=dict(font=dict(color="white", size=20)))
 st.write(temp_fig["data"])
