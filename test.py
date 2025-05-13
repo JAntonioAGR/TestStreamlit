@@ -1,6 +1,7 @@
 import streamlit as st
 import yfinance as yf
 import plotly.graph_objects as go
+import plotly.express as px
 from datetime import datetime
 import pandas as pd
 from pandas.tseries.offsets import CustomBusinessDay
@@ -695,5 +696,7 @@ rendimientos_fondo_bmks_df = rendimientos_fondo_bmks_df.loc[
     (rendimientos_fondo_bmks_df.index <= fecha_final_grafica_rendimientos_historicos)
 ].reset_index()
 rendimientos_fondo_bmks_df = rendimientos_fondo_bmks_df.melt(id_vars="Fecha", var_name="Portafolio", value_name="Rendimiento")
-st.write(rendimientos_fondo_bmks_df)
+
+fig = px.line(rendimientos_fondo_bmks_df, x="Fecha", y="Rendimiento", color="Portafolio")
+st.plotly_chart(fig)
 
