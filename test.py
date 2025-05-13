@@ -696,6 +696,8 @@ rendimientos_fondo_bmks_df = rendimientos_fondo_bmks_df.loc[
     (rendimientos_fondo_bmks_df.index <= fecha_final_grafica_rendimientos_historicos)
 ].reset_index()
 rendimientos_fondo_bmks_df = rendimientos_fondo_bmks_df.melt(id_vars="Fecha", var_name="Portafolio", value_name="Rendimiento")
+rendimientos_fondo_bmks_vis_df = rendimientos_fondo_bmks_df.copy()
+rendimientos_fondo_bmks_vis_df["Rendimiento"] *= 100
 
 fig = px.line(rendimientos_fondo_bmks_df, x="Fecha", y="Rendimiento", color="Portafolio")
 st.plotly_chart(fig)
