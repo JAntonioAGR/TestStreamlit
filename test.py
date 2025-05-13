@@ -1,5 +1,6 @@
 import streamlit as st
 import yfinance as yf
+import plotly.graph_objects as go
 from datetime import datetime
 import pandas as pd
 from pandas.tseries.offsets import CustomBusinessDay
@@ -14,6 +15,8 @@ import io
 from selenium import webdriver 
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
+
+# import general_function.general_func as gf
 
 def formatea_precios_yahoo(bmks_rv, fecha):
     precios_bmks_yahoo_df = yf.download(bmks_rv, start=datetime(year=fecha.year - 1, month=1, day=1).strftime("%Y-%m-%d"))
@@ -59,19 +62,20 @@ def formatea_precios_bmks_valmer():
 def formatea_precios_bmks(fecha):
     spot_df = formatea_precios_spot()
     precios_bmks_yahoo_df = formatea_precios_yahoo(bmks_rv, fecha)
-    precios_bmks_df = pd.merge(precios_bmks_yahoo_df, spot_df, on="Fecha", how="left")
+    precios_bmks_df = pd.merge(precios_bmks_yahoo_df, spot_df, on="Fecha", how="outer")
     precios_bmks_df["SPESG"] = precios_bmks_df["SPESG_USD"] * precios_bmks_df["Spot"]
     precios_bmks_df["SPGSCI"] = precios_bmks_df["SPGSCI_USD"] * precios_bmks_df["Spot"]
     precios_bmks_df["S&P"] = precios_bmks_df["S&P_USD"] * precios_bmks_df["Spot"]
     precios_bmks_df["NDX"] = precios_bmks_df["NDX_USD"] * precios_bmks_df["Spot"]
     precios_bmks_df.drop(columns=["SPESG_USD", "SPGSCI_USD", "S&P_USD", "NDX_USD"], inplace=True)
     precios_bmks_isimp_df = formatea_precios_isimp()
-    precios_bmks_df = pd.merge(precios_bmks_df, precios_bmks_isimp_df, on="Fecha", how="left")
+    precios_bmks_df = pd.merge(precios_bmks_df, precios_bmks_isimp_df, on="Fecha", how="outer")
     precios_bmks_acwi_df = formatea_precios_acwi()
-    precios_bmks_df = pd.merge(precios_bmks_df, precios_bmks_acwi_df, on="Fecha", how="left")
+    precios_bmks_df = pd.merge(precios_bmks_df, precios_bmks_acwi_df, on="Fecha", how="outer")
     precios_bmks_valmer_df = formatea_precios_bmks_valmer()
-    precios_bmks_df = pd.merge(precios_bmks_df, precios_bmks_valmer_df, on="Fecha", how="left")
+    precios_bmks_df = pd.merge(precios_bmks_df, precios_bmks_valmer_df, on="Fecha", how="outer")
     precios_bmks_df.set_index("Fecha", inplace=True)
+    precios_bmks_df.sort_index(inplace=True)
 
     return precios_bmks_df.ffill()
 
@@ -300,6 +304,133 @@ def calcula_rendimientos_brutos(rendimientos_df, propiedades_fondos_df, impuesto
 
     return rendimientos_brutos_df
 
+
+def grafico_diferencias_rendimiento(rendimientos_df, periodo="MTD", titulo_adicional=""):
+    """
+    Genera un gráfico de barras horizontales que muestra las diferencias entre los rendimientos
+    de los fondos y sus benchmarks para un período específico.
+    
+    Parámetros:
+    rendimientos_df (pandas.DataFrame): DataFrame con los fondos como índice y columnas para rendimientos
+    periodo (str): Período a visualizar ("MTD", "YTD", "12 Meses", "30D", "90D", "180D")
+    titulo_adicional (str): Texto adicional para el título del gráfico
+    
+    Retorna:
+    fig (plotly.graph_objects.Figure): Figura de Plotly con el gráfico
+    """
+    # Definir la paleta de colores personalizada
+    custom_colors = ['#EC5E2A', '#FF8F66', '#1A3A6C', '#2E5095', '#4268B1', '#5680CE', '#6A98EB']
+    
+    # Reemplazar valores NaN con 0
+    rendimientos_df = rendimientos_df.fillna(0)
+    
+    # Determinar columnas para fondos y benchmarks
+    col_benchmark = f"BMK_{periodo}"
+    
+    # Verificar si las columnas existen
+    if periodo not in rendimientos_df.columns or col_benchmark not in rendimientos_df.columns:
+        raise ValueError(f"No se encontraron las columnas {periodo} o {col_benchmark} en el DataFrame")
+    
+    # Crear una copia del DataFrame para no modificar el original
+    df_trabajo = rendimientos_df.copy()
+    
+    # Caso especial para DYNAMIC: usar 12.0 como benchmark para todas las columnas
+    if 'DYNAMIC' in df_trabajo.index:
+        for col in df_trabajo.columns:
+            if col.startswith('BMK_'):
+                df_trabajo.loc['DYNAMIC', col] = 12.0
+    
+    # Calcular diferencias
+    df_trabajo['Diferencia'] = df_trabajo[periodo] - df_trabajo[col_benchmark]
+    
+    # Dividir en overweight y underweight
+    df_trabajo['Underweight'] = df_trabajo['Diferencia'].copy()
+    df_trabajo['Overweight'] = df_trabajo['Diferencia'].copy()
+    df_trabajo.loc[df_trabajo['Underweight'] > 0, 'Underweight'] = 0
+    df_trabajo.loc[df_trabajo['Overweight'] < 0, 'Overweight'] = 0
+    
+    # Ordenar por diferencia
+    df_trabajo = df_trabajo.sort_values(by='Diferencia')
+    
+    # Crear el gráfico de barras horizontales apiladas en Plotly
+    fig = go.Figure()
+    
+    fig.add_trace(go.Bar(
+        y=df_trabajo.index,  # Usar el índice como nombres de fondos
+        x=df_trabajo['Underweight'],
+        orientation='h',
+        marker=dict(
+            color=custom_colors[2],
+            line=dict(color='white', width=1)  # Agregar borde blanco
+        ),
+        name='Underperformance'
+    ))
+    
+    fig.add_trace(go.Bar(
+        y=df_trabajo.index,  # Usar el índice como nombres de fondos
+        x=df_trabajo['Overweight'],
+        orientation='h',
+        marker=dict(
+            color=custom_colors[0],
+            line=dict(color='white', width=1)  # Agregar borde blanco
+        ),
+        name='Outperformance'
+    ))
+    
+    # Añadir una línea vertical en el eje x=0
+    fig.add_shape(
+        type="line",
+        x0=0, x1=0, y0=-0.5, y1=len(df_trabajo)-0.5,
+        line=dict(color="white", width=0.8)
+    )
+    
+    # Añadir anotaciones para mostrar los valores
+    annotations = []
+    for i, (idx, row) in enumerate(df_trabajo.iterrows()):
+        if row['Diferencia'] < 0:
+            annotations.append(dict(
+                x=row['Underweight'], 
+                y=idx,  # Usar el índice como nombre del fondo
+                text=f"{abs(row['Underweight']):.2f}", 
+                xanchor='right', 
+                showarrow=False, 
+                font=dict(color='white')
+            ))
+        else:
+            annotations.append(dict(
+                x=row['Overweight'], 
+                y=idx,  # Usar el índice como nombre del fondo
+                text=f"{row['Overweight']:.2f}", 
+                xanchor='left', 
+                showarrow=False, 
+                font=dict(color='white')
+            ))
+    
+    # Ajustar altura del gráfico según la cantidad de fondos
+    height = max(500, 100 + len(df_trabajo) * 40)  # 40px por fondo + margen
+    
+    # Configurar etiquetas y título
+    fig.update_layout(
+        annotations=annotations,
+        xaxis_title='Diferencia de Rendimiento %',
+        title=f'Diferencias de Rendimiento entre Fondo y Benchmark ({periodo}){" - " + titulo_adicional if titulo_adicional else ""}',
+        barmode='stack',
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        height=height,
+        width=1000,
+        margin=dict(l=200),
+        plot_bgcolor='#0C2653',  # Color de fondo del gráfico
+        paper_bgcolor='#0C2653',  # Color de fondo del papel
+        font=dict(color='#FFFFFF')  # Color del texto
+    )
+    
+    # Asegurar que todas las etiquetas se muestren completamente
+    fig.update_yaxes(tickfont=dict(size=14))
+    fig.update_xaxes(gridcolor='#44475A')
+    fig.update_yaxes(gridcolor='#44475A')
+    
+    return fig
+
 fondo2benchmark = {
     "VECTUSA":{
         "Benchmarks":[
@@ -409,7 +540,7 @@ fondo2benchmark = {
     },
     "VECTMIX":{
         "Benchmarks":[
-            "S&P", "IPC"
+            "SPESG", "IPC"
         ],
         "Pesos":[0.5, 0.5]
     },
@@ -431,12 +562,12 @@ fondo2benchmark = {
     }
 }
 
-# if not st.experimental_user.is_logged_in:
-#     if st.button("Log in"):
-#         st.login()
-    
-#     st.write(st.experimental_user.email)
-# else:
+# Fecha = '2025-03-31'
+# gf.verificador_cache_PreciosFondos(Fecha)
+
+# df_p_r = pd.read_csv(f'../Data/Precios_Fondos{Fecha}.txt')
+
+# st.dataframe(df_p_r)
 
 bmks_rv = ["^MXX", "^SPESG", "^SPGSCI", "^GSPC", "^NDX"]
 
@@ -483,7 +614,7 @@ bmv_offset = infer_calendar(fechas_bmv)
 fechas_exactas_iniciales_rf = calcula_fechas_exactas_iniciales(fecha)
 fechas_habiles_iniciales_rf = calcula_fechas_habiles_iniciales(fechas_exactas_iniciales_rf, fechas_bmv, bmv_offset, tipo="Deuda")
 
-fechas_exactas_iniciales_rv = calcula_fechas_exactas_iniciales(fecha)
+fechas_exactas_iniciales_rv = calcula_fechas_exactas_iniciales((fecha - bmv_offset).to_pydatetime())
 fechas_exactas_iniciales_rv = {
     ventana:(fechas_exactas_iniciales_rv[ventana] + bmv_offset).to_pydatetime() if ventana in ["MTD", "YTD"] else
     fechas_exactas_iniciales_rv[ventana] for ventana in fechas_exactas_iniciales_rv.keys()
