@@ -659,12 +659,15 @@ fondo = st.selectbox(
 precios_fondo_bmks_df = pd.merge(precios_fondos_df[fondo].reset_index(), precios_bmks_df[fondo2benchmark[fondo]["Benchmarks"]].reset_index(), on="Fecha")
 precios_fondo_bmks_df[fondo2benchmark[fondo]["Benchmarks"]] = precios_fondo_bmks_df[fondo2benchmark[fondo]["Benchmarks"]].shift(1)
 precios_fondo_bmks_df.set_index("Fecha", inplace=True)
+
+st.write(precios_fondo_bmks_df)
+
 # rendimientos_fondo_bmks_df = precios_fondo_bmks_df.reset_index()
 # rendimientos_fondo_bmks_df[[fondo] + fondo2benchmark[fondo]["Benchmarks"]] = rendimientos_fondo_bmks_df[[fondo] + fondo2benchmark[fondo]["Benchmarks"]].pct_change()
-rendimientos_fondo_bmks_df = precios_fondo_bmks_df.pct_change()
-rendimientos_fondo_bmks_df["BMK"] = (rendimientos_fondo_bmks_df[fondo2benchmark[fondo]["Benchmarks"]] * fondo2benchmark[fondo]["Pesos"]).sum(axis=1)
-rendimientos_fondo_bmks_df.dropna(inplace=True)
-rendimientos_fondo_bmks_df = rendimientos_fondo_bmks_df[[fondo, "BMK"]]
+# rendimientos_fondo_bmks_df = precios_fondo_bmks_df.pct_change()
+# rendimientos_fondo_bmks_df["BMK"] = (rendimientos_fondo_bmks_df[fondo2benchmark[fondo]["Benchmarks"]] * fondo2benchmark[fondo]["Pesos"]).sum(axis=1)
+# rendimientos_fondo_bmks_df.dropna(inplace=True)
+# rendimientos_fondo_bmks_df = rendimientos_fondo_bmks_df[[fondo, "BMK"]]
 
 fecha_inicial_grafica_rendimientos_historicos = st.date_input(
     "Seleccione una fecha inicial:",
