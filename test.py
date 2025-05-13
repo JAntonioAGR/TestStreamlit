@@ -431,137 +431,137 @@ fondo2benchmark = {
     }
 }
 
-if not st.experimental_user.is_logged_in:
-    if st.button("Log in"):
-        st.login()
+# if not st.experimental_user.is_logged_in:
+#     if st.button("Log in"):
+#         st.login()
     
-    st.write(st.experimental_user.email)
-else:
+#     st.write(st.experimental_user.email)
+# else:
 
-    bmks_rv = ["^MXX", "^SPESG", "^SPGSCI", "^GSPC", "^NDX"]
+bmks_rv = ["^MXX", "^SPESG", "^SPGSCI", "^GSPC", "^NDX"]
 
-    propiedades_fondos_path = "./ArchivosRendimientos/PropiedadesFondos"
-    propiedades_fondos_filename = os.listdir(propiedades_fondos_path)[0]
-    propiedades_fondos_df = pd.read_excel(os.path.join(propiedades_fondos_path, propiedades_fondos_filename))
+propiedades_fondos_path = "./ArchivosRendimientos/PropiedadesFondos"
+propiedades_fondos_filename = os.listdir(propiedades_fondos_path)[0]
+propiedades_fondos_df = pd.read_excel(os.path.join(propiedades_fondos_path, propiedades_fondos_filename))
 
-    precios_fondos_valmer_path = "./ArchivosPeergroups/PreciosFondosValmer"
-    precios_fondos_valmer_filename = os.listdir(precios_fondos_valmer_path)[0]
-    precios_fondos_valmer_df = pd.read_csv(os.path.join(precios_fondos_valmer_path, precios_fondos_valmer_filename))
-    precios_fondos_valmer_df = precios_fondos_valmer_df[["FECHA", "EMISORA", "SERIE", "PRECIO SUCIO"]]
-    precios_fondos_valmer_df.rename(columns={"FECHA":"Fecha", "EMISORA":"Fondo", "SERIE":"Serie", "PRECIO SUCIO":"Precio"}, inplace=True)
-    precios_fondos_valmer_df["Fecha"] = pd.to_datetime(precios_fondos_valmer_df["Fecha"], format="%Y-%m-%d")
+precios_fondos_valmer_path = "./ArchivosPeergroups/PreciosFondosValmer"
+precios_fondos_valmer_filename = os.listdir(precios_fondos_valmer_path)[0]
+precios_fondos_valmer_df = pd.read_csv(os.path.join(precios_fondos_valmer_path, precios_fondos_valmer_filename))
+precios_fondos_valmer_df = precios_fondos_valmer_df[["FECHA", "EMISORA", "SERIE", "PRECIO SUCIO"]]
+precios_fondos_valmer_df.rename(columns={"FECHA":"Fecha", "EMISORA":"Fondo", "SERIE":"Serie", "PRECIO SUCIO":"Precio"}, inplace=True)
+precios_fondos_valmer_df["Fecha"] = pd.to_datetime(precios_fondos_valmer_df["Fecha"], format="%Y-%m-%d")
 
-    precios_fondos_df = precios_fondos_valmer_df.copy()
-    precios_fondos_df = precios_fondos_df[
-        pd.Series(list(zip(precios_fondos_df["Fondo"], precios_fondos_df["Serie"]))).isin(list(zip(propiedades_fondos_df["Fondo"], propiedades_fondos_df["Serie"])))
-    ].reset_index(drop=True)
+precios_fondos_df = precios_fondos_valmer_df.copy()
+precios_fondos_df = precios_fondos_df[
+    pd.Series(list(zip(precios_fondos_df["Fondo"], precios_fondos_df["Serie"]))).isin(list(zip(propiedades_fondos_df["Fondo"], propiedades_fondos_df["Serie"])))
+].reset_index(drop=True)
 
-    fechas = [datetime.today()]
-    temp_precios_fondos_df = descarga_rendimientos_MiVector(fechas)
-    temp_precios_fondos_df = temp_precios_fondos_df[
-        pd.Series(list(zip(temp_precios_fondos_df["Fondo"], temp_precios_fondos_df["Serie"]))).isin(list(zip(propiedades_fondos_df["Fondo"], propiedades_fondos_df["Serie"])))
-    ].reset_index(drop=True)
-    temp_precios_fondos_df = temp_precios_fondos_df[["Fecha", "Fondo", "Serie", "Precio"]]
+fechas = [datetime.today()]
+temp_precios_fondos_df = descarga_rendimientos_MiVector(fechas)
+temp_precios_fondos_df = temp_precios_fondos_df[
+    pd.Series(list(zip(temp_precios_fondos_df["Fondo"], temp_precios_fondos_df["Serie"]))).isin(list(zip(propiedades_fondos_df["Fondo"], propiedades_fondos_df["Serie"])))
+].reset_index(drop=True)
+temp_precios_fondos_df = temp_precios_fondos_df[["Fecha", "Fondo", "Serie", "Precio"]]
 
-    precios_fondos_df = pd.concat([precios_fondos_df, temp_precios_fondos_df], axis=0, ignore_index=True)
-    precios_fondos_df = precios_fondos_df[["Fecha", "Fondo", "Precio"]].pivot(index="Fecha", columns="Fondo")
-    precios_fondos_df = precios_fondos_df.droplevel(level=0, axis=1)
-    precios_fondos_df.columns.name = None
+precios_fondos_df = pd.concat([precios_fondos_df, temp_precios_fondos_df], axis=0, ignore_index=True)
+precios_fondos_df = precios_fondos_df[["Fecha", "Fondo", "Precio"]].pivot(index="Fecha", columns="Fondo")
+precios_fondos_df = precios_fondos_df.droplevel(level=0, axis=1)
+precios_fondos_df.columns.name = None
 
-    fecha = datetime.today()
-    fecha = datetime(year=fecha.year, month=fecha.month, day=fecha.day)
+fecha = datetime.today()
+fecha = datetime(year=fecha.year, month=fecha.month, day=fecha.day)
 
-    xmex = xcals.get_calendar("XMEX")
-    fechas_bmv = sorted(xmex.sessions_in_range(
-        start=(datetime.today() - relativedelta(years=20) + timedelta(days=100)).strftime("%Y-%m-%d"), 
-        end=datetime.today().strftime("%Y-%m-%d")
-    ).to_pydatetime())
-    fechas_bmv.remove(datetime(2024, 10, 1, 0, 0))
+xmex = xcals.get_calendar("XMEX")
+fechas_bmv = sorted(xmex.sessions_in_range(
+    start=(datetime.today() - relativedelta(years=20) + timedelta(days=100)).strftime("%Y-%m-%d"), 
+    end=datetime.today().strftime("%Y-%m-%d")
+).to_pydatetime())
+fechas_bmv.remove(datetime(2024, 10, 1, 0, 0))
 
-    bmv_offset = infer_calendar(fechas_bmv)
+bmv_offset = infer_calendar(fechas_bmv)
 
-    fechas_exactas_iniciales_rf = calcula_fechas_exactas_iniciales(fecha)
-    fechas_habiles_iniciales_rf = calcula_fechas_habiles_iniciales(fechas_exactas_iniciales_rf, fechas_bmv, bmv_offset, tipo="Deuda")
+fechas_exactas_iniciales_rf = calcula_fechas_exactas_iniciales(fecha)
+fechas_habiles_iniciales_rf = calcula_fechas_habiles_iniciales(fechas_exactas_iniciales_rf, fechas_bmv, bmv_offset, tipo="Deuda")
 
-    fechas_exactas_iniciales_rv = calcula_fechas_exactas_iniciales(fecha)
-    fechas_exactas_iniciales_rv = {
-        ventana:(fechas_exactas_iniciales_rv[ventana] + bmv_offset).to_pydatetime() if ventana in ["MTD", "YTD"] else
-        fechas_exactas_iniciales_rv[ventana] for ventana in fechas_exactas_iniciales_rv.keys()
-    }
-    fechas_habiles_iniciales_rv = calcula_fechas_habiles_iniciales(fechas_exactas_iniciales_rv, fechas_bmv, bmv_offset, tipo="RV")
+fechas_exactas_iniciales_rv = calcula_fechas_exactas_iniciales(fecha)
+fechas_exactas_iniciales_rv = {
+    ventana:(fechas_exactas_iniciales_rv[ventana] + bmv_offset).to_pydatetime() if ventana in ["MTD", "YTD"] else
+    fechas_exactas_iniciales_rv[ventana] for ventana in fechas_exactas_iniciales_rv.keys()
+}
+fechas_habiles_iniciales_rv = calcula_fechas_habiles_iniciales(fechas_exactas_iniciales_rv, fechas_bmv, bmv_offset, tipo="RV")
 
-    precios_bmks_df = formatea_precios_bmks(fecha)
+precios_bmks_df = formatea_precios_bmks(fecha)
 
-    # st.write(precios_fondos_df)
-    # st.write(precios_bmks_df)
-    # st.write(fechas_habiles_iniciales_rf)
-    # st.write(fechas_habiles_iniciales_rv)
-    # st.write(propiedades_fondos_df)
+# st.write(precios_fondos_df)
+# st.write(precios_bmks_df)
+# st.write(fechas_habiles_iniciales_rf)
+# st.write(fechas_habiles_iniciales_rv)
+# st.write(propiedades_fondos_df)
 
-    rendimientos_bmks_df = formatea_rendimientos_bmk(fecha, precios_bmks_df, fechas_habiles_iniciales_rf, fechas_habiles_iniciales_rv, propiedades_fondos_df, bmv_offset, fondo2benchmark)
-    rendimientos_bmks_df.reset_index(inplace=True)
-    rendimientos_bmks_df.rename(columns={"index":"Fondo"}|{col:f"BMK_{col}" for col in rendimientos_bmks_df.columns if col != "index"}, inplace=True)
+rendimientos_bmks_df = formatea_rendimientos_bmk(fecha, precios_bmks_df, fechas_habiles_iniciales_rf, fechas_habiles_iniciales_rv, propiedades_fondos_df, bmv_offset, fondo2benchmark)
+rendimientos_bmks_df.reset_index(inplace=True)
+rendimientos_bmks_df.rename(columns={"index":"Fondo"}|{col:f"BMK_{col}" for col in rendimientos_bmks_df.columns if col != "index"}, inplace=True)
 
-    rendimientos_fondos_df = formatea_rendimientos_fondos(fecha, precios_fondos_df, fechas_habiles_iniciales_rf, fechas_habiles_iniciales_rv, propiedades_fondos_df)
-    rendimientos_fondos_df.reset_index(inplace=True)
-    rendimientos_fondos_df.rename(columns={"index":"Fondo"}, inplace=True)
+rendimientos_fondos_df = formatea_rendimientos_fondos(fecha, precios_fondos_df, fechas_habiles_iniciales_rf, fechas_habiles_iniciales_rv, propiedades_fondos_df)
+rendimientos_fondos_df.reset_index(inplace=True)
+rendimientos_fondos_df.rename(columns={"index":"Fondo"}, inplace=True)
 
-    rendimientos_df = pd.merge(rendimientos_fondos_df, rendimientos_bmks_df, on="Fondo")
-    rendimientos_df = rendimientos_df[["Fondo"] + sum([[col, f"BMK_{col}"] for col in fechas_exactas_iniciales_rf.keys()], [])]
-    rendimientos_df.set_index("Fondo", inplace=True)
-    rendimientos_df *= 100
-    rendimientos_df = rendimientos_df.round(decimals=2)
+rendimientos_df = pd.merge(rendimientos_fondos_df, rendimientos_bmks_df, on="Fondo")
+rendimientos_df = rendimientos_df[["Fondo"] + sum([[col, f"BMK_{col}"] for col in fechas_exactas_iniciales_rf.keys()], [])]
+rendimientos_df.set_index("Fondo", inplace=True)
+rendimientos_df *= 100
+rendimientos_df = rendimientos_df.round(decimals=2)
 
-    st.write(rendimientos_df.style.format("{:.2f}"))
+st.write(rendimientos_df.style.format("{:.2f}"))
 
-    st.subheader("Rendimientos Históricos VS Benchmark")
+st.subheader("Rendimientos Históricos VS Benchmark")
 
-    fondo = st.selectbox(
-        "Seleccione un fondo de Vector",
-        tuple(rendimientos_fondos_df["Fondo"].unique())
-    )
+fondo = st.selectbox(
+    "Seleccione un fondo de Vector",
+    tuple(rendimientos_fondos_df["Fondo"].unique())
+)
 
-    #st.write(precios_bmks_df[fondo2benchmark[fondo]["Benchmarks"]])
-    #st.write(precios_fondos_df[fondo])
+#st.write(precios_bmks_df[fondo2benchmark[fondo]["Benchmarks"]])
+#st.write(precios_fondos_df[fondo])
 
-    precios_fondo_bmks_df = pd.merge(precios_fondos_df[fondo].reset_index(), precios_bmks_df[fondo2benchmark[fondo]["Benchmarks"]].reset_index(), on="Fecha")
-    precios_fondo_bmks_df[fondo2benchmark[fondo]["Benchmarks"]] = precios_fondo_bmks_df[fondo2benchmark[fondo]["Benchmarks"]].shift(1)
-    precios_fondo_bmks_df.set_index("Fecha", inplace=True)
-    # rendimientos_fondo_bmks_df = precios_fondo_bmks_df.reset_index()
-    # rendimientos_fondo_bmks_df[[fondo] + fondo2benchmark[fondo]["Benchmarks"]] = rendimientos_fondo_bmks_df[[fondo] + fondo2benchmark[fondo]["Benchmarks"]].pct_change()
-    rendimientos_fondo_bmks_df = precios_fondo_bmks_df.pct_change()
-    rendimientos_fondo_bmks_df["BMK"] = (rendimientos_fondo_bmks_df[fondo2benchmark[fondo]["Benchmarks"]] * fondo2benchmark[fondo]["Pesos"]).sum(axis=1)
-    rendimientos_fondo_bmks_df.dropna(inplace=True)
-    rendimientos_fondo_bmks_df = rendimientos_fondo_bmks_df[[fondo, "BMK"]]
+precios_fondo_bmks_df = pd.merge(precios_fondos_df[fondo].reset_index(), precios_bmks_df[fondo2benchmark[fondo]["Benchmarks"]].reset_index(), on="Fecha")
+precios_fondo_bmks_df[fondo2benchmark[fondo]["Benchmarks"]] = precios_fondo_bmks_df[fondo2benchmark[fondo]["Benchmarks"]].shift(1)
+precios_fondo_bmks_df.set_index("Fecha", inplace=True)
+# rendimientos_fondo_bmks_df = precios_fondo_bmks_df.reset_index()
+# rendimientos_fondo_bmks_df[[fondo] + fondo2benchmark[fondo]["Benchmarks"]] = rendimientos_fondo_bmks_df[[fondo] + fondo2benchmark[fondo]["Benchmarks"]].pct_change()
+rendimientos_fondo_bmks_df = precios_fondo_bmks_df.pct_change()
+rendimientos_fondo_bmks_df["BMK"] = (rendimientos_fondo_bmks_df[fondo2benchmark[fondo]["Benchmarks"]] * fondo2benchmark[fondo]["Pesos"]).sum(axis=1)
+rendimientos_fondo_bmks_df.dropna(inplace=True)
+rendimientos_fondo_bmks_df = rendimientos_fondo_bmks_df[[fondo, "BMK"]]
 
-    fecha_inicial_grafica_rendimientos_historicos = st.date_input(
-        "Seleccione una fecha inicial:",
-        value=rendimientos_fondo_bmks_df.index.min(),
-        min_value=rendimientos_fondo_bmks_df.index.min(),
-        max_value=rendimientos_fondo_bmks_df.index.max()
-    )
+fecha_inicial_grafica_rendimientos_historicos = st.date_input(
+    "Seleccione una fecha inicial:",
+    value=rendimientos_fondo_bmks_df.index.min(),
+    min_value=rendimientos_fondo_bmks_df.index.min(),
+    max_value=rendimientos_fondo_bmks_df.index.max()
+)
 
-    fecha_final_grafica_rendimientos_historicos = st.date_input(
-        "Seleccione una fecha inicial:",
-        value=rendimientos_fondo_bmks_df.index.max(),
-        min_value=rendimientos_fondo_bmks_df.index.min(),
-        max_value=rendimientos_fondo_bmks_df.index.max()
-    )
+fecha_final_grafica_rendimientos_historicos = st.date_input(
+    "Seleccione una fecha inicial:",
+    value=rendimientos_fondo_bmks_df.index.max(),
+    min_value=rendimientos_fondo_bmks_df.index.min(),
+    max_value=rendimientos_fondo_bmks_df.index.max()
+)
 
-    fecha_inicial_grafica_rendimientos_historicos = datetime(
-        year=fecha_inicial_grafica_rendimientos_historicos.year,
-        month=fecha_inicial_grafica_rendimientos_historicos.month,
-        day=fecha_inicial_grafica_rendimientos_historicos.day
-    )
-    fecha_final_grafica_rendimientos_historicos = datetime(
-        year=fecha_final_grafica_rendimientos_historicos.year,
-        month=fecha_final_grafica_rendimientos_historicos.month,
-        day=fecha_final_grafica_rendimientos_historicos.day
-    )
+fecha_inicial_grafica_rendimientos_historicos = datetime(
+    year=fecha_inicial_grafica_rendimientos_historicos.year,
+    month=fecha_inicial_grafica_rendimientos_historicos.month,
+    day=fecha_inicial_grafica_rendimientos_historicos.day
+)
+fecha_final_grafica_rendimientos_historicos = datetime(
+    year=fecha_final_grafica_rendimientos_historicos.year,
+    month=fecha_final_grafica_rendimientos_historicos.month,
+    day=fecha_final_grafica_rendimientos_historicos.day
+)
 
-    rendimientos_fondo_bmks_df = rendimientos_fondo_bmks_df.loc[
-        (rendimientos_fondo_bmks_df.index >= fecha_inicial_grafica_rendimientos_historicos) &
-        (rendimientos_fondo_bmks_df.index <= fecha_final_grafica_rendimientos_historicos)
-    ]
-    st.write(rendimientos_fondo_bmks_df)
+rendimientos_fondo_bmks_df = rendimientos_fondo_bmks_df.loc[
+    (rendimientos_fondo_bmks_df.index >= fecha_inicial_grafica_rendimientos_historicos) &
+    (rendimientos_fondo_bmks_df.index <= fecha_final_grafica_rendimientos_historicos)
+]
+st.write(rendimientos_fondo_bmks_df)
 
