@@ -659,6 +659,7 @@ fondo = st.selectbox(
 precios_fondo_bmks_df = pd.merge(precios_fondos_df[fondo].reset_index(), precios_bmks_df[fondo2benchmark[fondo]["Benchmarks"]].reset_index(), on="Fecha")
 precios_fondo_bmks_df[fondo2benchmark[fondo]["Benchmarks"]] = precios_fondo_bmks_df[fondo2benchmark[fondo]["Benchmarks"]].shift(1)
 precios_fondo_bmks_df.set_index("Fecha", inplace=True)
+precios_fondo_bmks_df.dropna(inplace=True)
 # rendimientos_fondo_bmks_df = precios_fondo_bmks_df.reset_index()
 # rendimientos_fondo_bmks_df[[fondo] + fondo2benchmark[fondo]["Benchmarks"]] = rendimientos_fondo_bmks_df[[fondo] + fondo2benchmark[fondo]["Benchmarks"]].pct_change()
 # rendimientos_fondo_bmks_df = precios_fondo_bmks_df.pct_change()
@@ -694,7 +695,8 @@ fecha_final_grafica_rendimientos_historicos = datetime(
 rendimientos_fondo_bmks_df = precios_fondo_bmks_df.loc[
     (precios_fondo_bmks_df.index >= fecha_inicial_grafica_rendimientos_historicos) &
     (precios_fondo_bmks_df.index <= fecha_final_grafica_rendimientos_historicos)
-].reset_index()
+]
+rendimientos_fondo_bmks_df = rendimientos_fondo_bmks_df.div(rendimientos_fondo_bmks_df.loc[fecha_inicial_grafica_rendimientos_historicos], axis=1)
 
 st.write(rendimientos_fondo_bmks_df)
 
