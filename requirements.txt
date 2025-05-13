@@ -4,3 +4,4 @@ exchange_calendars
 selenium
 lxml
 Authlib
+plotly
