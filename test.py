@@ -694,5 +694,6 @@ rendimientos_fondo_bmks_df = rendimientos_fondo_bmks_df.loc[
     (rendimientos_fondo_bmks_df.index >= fecha_inicial_grafica_rendimientos_historicos) &
     (rendimientos_fondo_bmks_df.index <= fecha_final_grafica_rendimientos_historicos)
 ].reset_index()
+rendimientos_fondo_bmks_df = rendimientos_fondo_bmks_df.melt(id_vars="Fecha", var_name="Portafolio", value_name="Rendimiento")
 st.write(rendimientos_fondo_bmks_df)
 
