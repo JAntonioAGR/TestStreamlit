@@ -455,6 +455,7 @@ def visualiza_precios_indizados_fondo_bmk(precios_indizados_fondo_bmks_df):
     temp_fig = px.line(precios_indizados_fondo_bmks_df_vis, x="Fecha", y="Rendimiento (%)", color="Portafolio")
     for data in temp_fig["data"]:
         data["line"]["color"] = "white" if data["legendgroup"] == "BMK" else "#EC5E2A"
+        data["line"]["width"] = 2
         
         fig.add_trace(go.Scatter(data))
 
