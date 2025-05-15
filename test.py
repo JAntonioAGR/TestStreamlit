@@ -633,7 +633,13 @@ precios_fondos_df = precios_fondos_df[["Fecha", "Fondo", "Precio"]].pivot(index=
 precios_fondos_df = precios_fondos_df.droplevel(level=0, axis=1)
 precios_fondos_df.columns.name = None
 
-fecha = datetime.today()
+# fecha = datetime.today()
+fecha = st.date_input(
+    "Seleccione una fecha final para el caclulo de los rendimientos:",
+    value=precios_fondos_df.index.max(),
+    min_value=precios_fondos_df.index.min(),
+    max_value=precios_fondos_df.index.max()
+)
 fecha = datetime(year=fecha.year, month=fecha.month, day=fecha.day)
 
 xmex = xcals.get_calendar("XMEX")
@@ -751,5 +757,5 @@ precios_indizados_fondo_bmks_df = precios_indizados_fondo_bmks_df[[fondo, "BMK"]
 # fig.update_layout(template="none", margin=dict(l=120, t=20, r=20, b=80), paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0.3)", legend=dict(font=dict(color="white", size=20)))
 precios_indizados_fondo_bmk_fig = visualiza_precios_indizados_fondo_bmk(precios_indizados_fondo_bmks_df)
 st.plotly_chart(precios_indizados_fondo_bmk_fig)
-st.write(precios_indizados_fondo_bmk_fig["data"])
+# st.write(precios_indizados_fondo_bmk_fig["data"])
 
