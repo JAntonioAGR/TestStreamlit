@@ -185,15 +185,17 @@ def formatea_rendimientos_bmk(fecha, precios_bmks_df, fechas_habiles_iniciales_r
 
     return rendimientos_bmks_df
 
-def formatea_rendimientos_fondos(fecha, precios_fondos_df, fechas_habiles_iniciales_rf, fechas_habiles_iniciales_rv, propiedades_fondos_df):
+def formatea_rendimientos_fondos(fecha, precios_fondos_df, fechas_habiles_iniciales_rf, fechas_habiles_iniciales_rv, propiedades_fondos_df, tipo_calculo="XF"):
     rendimientos_df = pd.DataFrame()
     for tipo in ["RF", "RV"]:
         fondos = propiedades_fondos_df.loc[propiedades_fondos_df["Tipo"] == tipo, "Fondo"].tolist()
         fechas_habiles_iniciales = fechas_habiles_iniciales_rf if tipo == "RF" else fechas_habiles_iniciales_rv
         temp_rendimientos_df = calcula_rendimientos_fondos(precios_fondos_df, fondos, fecha, fechas_habiles_iniciales)
-        if temp_rendimientos_df.index.isin(propiedades_fondos_df[~propiedades_fondos_df["Serie"].isin(["XF0", "XF"])]["Fondo"]).any():
-            temp_rendimientos_brutos_df = calcula_rendimientos_brutos(temp_rendimientos_df, propiedades_fondos_df, 0.005, fecha, fechas_habiles_iniciales_rf, fechas_habiles_iniciales_rv)
-            temp_rendimientos_df.loc[propiedades_fondos_df[~propiedades_fondos_df["Serie"].isin(["XF0", "XF"])]["Fondo"]] = temp_rendimientos_brutos_df.copy()
+        temp_propiedades_fondos_df = propiedades_fondos_df[~propiedades_fondos_df["Serie"].isin(["XF0", "XF"])].copy()
+        if temp_rendimientos_df.index.isin(temp_propiedades_fondos_df["Fondo"]).any():
+            temp_propiedades_fondos_df = temp_propiedades_fondos_df[temp_propiedades_fondos_df["Tipo"] == tipo]
+            temp_rendimientos_brutos_df = calcula_rendimientos_brutos(temp_rendimientos_df, temp_propiedades_fondos_df, 0.005, fecha, fechas_habiles_iniciales_rf, fechas_habiles_iniciales_rv)
+            temp_rendimientos_df.loc[temp_propiedades_fondos_df["Fondo"]] = temp_rendimientos_brutos_df.copy()
 
         rendimientos_df = pd.concat([rendimientos_df, temp_rendimientos_df], axis=0)
 
@@ -280,7 +282,7 @@ def calcula_rendimientos_anualizados(rendimientos_df, fecha, fechas_habiles_inic
     return rendimientos_anualizados_df
 
 def calcula_rendimientos_brutos(rendimientos_df, propiedades_fondos_df, impuesto, fecha, fechas_habiles_iniciales_rf, fechas_habiles_iniciales_rv):
-    temp_df = propiedades_fondos_df[~propiedades_fondos_df["Serie"].isin(["XF0", "XF"])].copy()
+    temp_df = propiedades_fondos_df.copy()
     temp_df[["Comision", "Factor RF"]] /= 100
 
     dias_transcurridos_ventanas_df = pd.DataFrame([
@@ -616,6 +618,15 @@ precios_fondos_valmer_df = precios_fondos_valmer_df[["FECHA", "EMISORA", "SERIE"
 precios_fondos_valmer_df.rename(columns={"FECHA":"Fecha", "EMISORA":"Fondo", "SERIE":"Serie", "PRECIO SUCIO":"Precio"}, inplace=True)
 precios_fondos_valmer_df["Fecha"] = pd.to_datetime(precios_fondos_valmer_df["Fecha"], format="%Y-%m-%d")
 
+st.header("Rendimientos Brutos")
+
+tipo_calculo = st.radio(
+    "Seleccione las series con las que desea calcular los rendimientos:",
+    ["XF", "FD"], horizontal=True
+)
+
+propiedades_fondos_df = propiedades_fondos_df[propiedades_fondos_df["TipoCalculo"] == tipo_calculo]
+
 precios_fondos_df = precios_fondos_valmer_df.copy()
 precios_fondos_df = precios_fondos_df[
     pd.Series(list(zip(precios_fondos_df["Fondo"], precios_fondos_df["Serie"]))).isin(list(zip(propiedades_fondos_df["Fondo"], propiedades_fondos_df["Serie"])))
@@ -632,6 +643,8 @@ precios_fondos_df = pd.concat([precios_fondos_df, temp_precios_fondos_df], axis=
 precios_fondos_df = precios_fondos_df[["Fecha", "Fondo", "Precio"]].pivot(index="Fecha", columns="Fondo")
 precios_fondos_df = precios_fondos_df.droplevel(level=0, axis=1)
 precios_fondos_df.columns.name = None
+
+# st.write(precios_fondos_df)
 
 # fecha = datetime.today()
 fecha = st.date_input(
@@ -673,7 +686,7 @@ rendimientos_bmks_df = formatea_rendimientos_bmk(fecha, precios_bmks_df, fechas_
 rendimientos_bmks_df.reset_index(inplace=True)
 rendimientos_bmks_df.rename(columns={"index":"Fondo"}|{col:f"BMK_{col}" for col in rendimientos_bmks_df.columns if col != "index"}, inplace=True)
 
-rendimientos_fondos_df = formatea_rendimientos_fondos(fecha, precios_fondos_df, fechas_habiles_iniciales_rf, fechas_habiles_iniciales_rv, propiedades_fondos_df)
+rendimientos_fondos_df = formatea_rendimientos_fondos(fecha, precios_fondos_df, fechas_habiles_iniciales_rf, fechas_habiles_iniciales_rv, propiedades_fondos_df, tipo_calculo)
 rendimientos_fondos_df.reset_index(inplace=True)
 rendimientos_fondos_df.rename(columns={"index":"Fondo"}, inplace=True)
 
@@ -683,28 +696,50 @@ rendimientos_df.set_index("Fondo", inplace=True)
 rendimientos_df *= 100
 rendimientos_df = rendimientos_df.round(decimals=2)
 
-st.write(rendimientos_df.style.format("{:.2f}"))
+st.dataframe(rendimientos_df.style.format("{:.2f}"), use_container_width=True)
+ # Definir los subconjuntos de fondos
+categorias = {
+    "Deuda": ["VECTRF", "VECTPRE", "VECTMD", "VECTFI", "VECTCOR", "VECTTR", "VECTPZO", "VECTCOB"],
+    "Renta Variable": ["VECTIND", "VECTPA", "VECTMIX", "VECTSIC", "VECTUSD", "COMMODQ", "VECTUSA", "MXRATES", "EQUITY", "NEXTGEN"],
+    "Estratégicos": ["INCOME", "BALANCE", "DYNAMIC"]
+}
+periodos = ["MTD", "YTD", "12_Meses", "30D", "90D", "180D"]
+periodo_seleccionado = st.selectbox(
+    "Seleccionar período", 
+    options=periodos, 
+    format_func=lambda x: x.replace("_", " ")
+)
+ # Generar y mostrar los gráficos por categoría
+try:
+    for categoria, fondos in categorias.items():
+        st.subheader(f"Categoría: {categoria}")
+        
+        # Filtrar el DataFrame para incluir solo los fondos de esta categoría
+        fondos_existentes = [fondo for fondo in fondos if fondo in rendimientos_df.index]
+        if fondos_existentes:
+            df_categoria = rendimientos_df.loc[fondos_existentes]
+            
+            # Generar el gráfico para esta categoría
+            fig = grafico_diferencias_rendimiento(df_categoria, periodo_seleccionado, categoria)
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.warning(f"No se encontraron fondos para la categoría {categoria}")
 
-st.subheader("Rendimientos Históricos VS Benchmark")
+except Exception as e:
+    st.error(f"Error al generar el gráfico: {e}")
+    st.error("Verifica que el DataFrame tenga la estructura correcta")
+
+st.header("Rendimientos Históricos VS Benchmark")
 
 fondo = st.selectbox(
     "Seleccione un fondo de Vector",
     tuple(rendimientos_fondos_df["Fondo"].unique())
 )
 
-# st.write(precios_bmks_df[fondo2benchmark[fondo]["Benchmarks"]])
-# st.write(precios_fondos_df[fondo])
-
 precios_fondo_bmks_df = pd.merge(precios_fondos_df[fondo].reset_index(), precios_bmks_df[fondo2benchmark[fondo]["Benchmarks"]].reset_index(), on="Fecha")
 precios_fondo_bmks_df[fondo2benchmark[fondo]["Benchmarks"]] = precios_fondo_bmks_df[fondo2benchmark[fondo]["Benchmarks"]].shift(1)
 precios_fondo_bmks_df.set_index("Fecha", inplace=True)
 precios_fondo_bmks_df.dropna(inplace=True)
-# rendimientos_fondo_bmks_df = precios_fondo_bmks_df.reset_index()
-# rendimientos_fondo_bmks_df[[fondo] + fondo2benchmark[fondo]["Benchmarks"]] = rendimientos_fondo_bmks_df[[fondo] + fondo2benchmark[fondo]["Benchmarks"]].pct_change()
-# rendimientos_fondo_bmks_df = precios_fondo_bmks_df.pct_change()
-# rendimientos_fondo_bmks_df["BMK"] = (rendimientos_fondo_bmks_df[fondo2benchmark[fondo]["Benchmarks"]] * fondo2benchmark[fondo]["Pesos"]).sum(axis=1)
-# rendimientos_fondo_bmks_df.dropna(inplace=True)
-# rendimientos_fondo_bmks_df = rendimientos_fondo_bmks_df[[fondo, "BMK"]]
 
 fecha_inicial_grafica_rendimientos_historicos = st.date_input(
     "Seleccione una fecha inicial:",
@@ -738,24 +773,7 @@ precios_indizados_fondo_bmks_df = precios_fondo_bmks_df.loc[
 precios_indizados_fondo_bmks_df = precios_indizados_fondo_bmks_df.div(precios_indizados_fondo_bmks_df.loc[fecha_inicial_grafica_rendimientos_historicos], axis=1) - 1
 precios_indizados_fondo_bmks_df["BMK"] = (precios_indizados_fondo_bmks_df[fondo2benchmark[fondo]["Benchmarks"]] * fondo2benchmark[fondo]["Pesos"]).sum(axis=1)
 precios_indizados_fondo_bmks_df = precios_indizados_fondo_bmks_df[[fondo, "BMK"]]
-# precios_indizados_fondo_bmks_df_vis = precios_indizados_fondo_bmks_df.copy()
-# precios_indizados_fondo_bmks_df_vis *= 100
-# precios_indizados_fondo_bmks_df_vis.reset_index(inplace=True)
-# precios_indizados_fondo_bmks_df_vis = precios_indizados_fondo_bmks_df_vis.melt(id_vars="Fecha", value_name="Rendimiento (%)", var_name="Portafolio")
 
-# # st.write(precios_indizados_fondo_bmks_df_vis)
-
-# fig = go.Figure()
-# temp_fig = px.line(precios_indizados_fondo_bmks_df_vis, x="Fecha", y="Rendimiento (%)", color="Portafolio")
-# for data in temp_fig["data"]:
-#     data["line"]["color"] = "white" if data["legendgroup"] == "BMK" else "#EC5E2A"
-    
-#     fig.add_trace(go.Scatter(data))
-
-# fig.update_xaxes(showgrid=True, linecolor='white', tickangle=90, tickfont=dict(size=15, color="white"), linewidth=4, mirror=True, title=None)
-# fig.update_yaxes(showgrid=True, gridcolor='#44475A', linecolor='white', tickfont=dict(size=17, color="white"), title=dict(text='Rendimiento (%)', font=dict(size=30, color='white')),  linewidth=4, mirror=True)
-# fig.update_layout(template="none", margin=dict(l=120, t=20, r=20, b=80), paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0.3)", legend=dict(font=dict(color="white", size=20)))
 precios_indizados_fondo_bmk_fig = visualiza_precios_indizados_fondo_bmk(precios_indizados_fondo_bmks_df)
 st.plotly_chart(precios_indizados_fondo_bmk_fig)
-# st.write(precios_indizados_fondo_bmk_fig["data"])
 
