@@ -763,7 +763,8 @@ serie = st.selectbox(
     tuple(precios_fondos_MiVector_df[precios_fondos_MiVector_df["Fondo"] == fondo]["Serie"].unique())
 )
 
-
+st.write(precios_fondos_valmer_df[(precios_fondos_valmer_df["Fondo"] == fondo) & (precios_fondos_valmer_df["Serie"] == serie)])
+st.write(precios_fondos_MiVector_df[precios_fondos_MiVector_df["Fondo"] == fondo])
 
 precios_fondo_bmks_df = pd.merge(precios_fondos_df[fondo].reset_index(), precios_bmks_df[fondo2benchmark[fondo]["Benchmarks"]].reset_index(), on="Fecha")
 precios_fondo_bmks_df[fondo2benchmark[fondo]["Benchmarks"]] = precios_fondo_bmks_df[fondo2benchmark[fondo]["Benchmarks"]].shift(1)
