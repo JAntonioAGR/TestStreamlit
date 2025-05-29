@@ -770,8 +770,8 @@ temp_precios_fondo_bmks_df1 = precios_fondos_valmer_df[
 ].copy()
 temp_precios_fondo_bmks_df2 = precios_fondos_MiVector_df[
     (precios_fondos_MiVector_df["Fondo"] == fondo) & (precios_fondos_MiVector_df["Serie"] == serie)
-][["Fondo", "Serie", "Precio"]].copy()
-temp_precios_fondo_bmks_df = pd.concat([temp_precios_fondo_bmks_df1, temp_precios_fondo_bmks_df2], axis=0)
+][["Fecha", "Fondo", "Serie", "Precio"]].copy()
+temp_precios_fondo_bmks_df = pd.concat([temp_precios_fondo_bmks_df1, temp_precios_fondo_bmks_df2], axis=0, ignore_index=True)
 
 st.write(temp_precios_fondo_bmks_df)
 
