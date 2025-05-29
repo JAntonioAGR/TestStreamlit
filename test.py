@@ -753,7 +753,7 @@ except Exception as e:
 
 st.header("Rendimientos Dólares")
 
-st.write("Ok")
+st.write(precios_bmks_df)
 
 st.header("Rendimientos Históricos VS Benchmark")
 
