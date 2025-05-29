@@ -653,11 +653,9 @@ precios_fondos_df = precios_fondos_df[
 ].reset_index(drop=True)
 
 fechas = [datetime.today()]
-temp_precios_fondos_df = descarga_rendimientos_MiVector(fechas)
+precios_fondos_MiVector_df = descarga_rendimientos_MiVector(fechas)
 
-precios_fondos_MiVector_df = temp_precios_fondos_df.copy()
-st.write(precios_fondos_MiVector_df)
-
+temp_precios_fondos_df = precios_fondos_MiVector_df.copy()
 temp_precios_fondos_df = temp_precios_fondos_df[
     pd.Series(list(zip(temp_precios_fondos_df["Fondo"], temp_precios_fondos_df["Serie"]))).isin(list(zip(propiedades_fondos_df["Fondo"], propiedades_fondos_df["Serie"])))
 ].reset_index(drop=True)
@@ -759,6 +757,13 @@ fondo = st.selectbox(
     "Seleccione un fondo de Vector",
     tuple(rendimientos_fondos_df["Fondo"].unique())
 )
+
+serie = st.selectbox(
+    "Seleccione una serie",
+    tuple(precios_fondos_MiVector_df[precios_fondos_MiVector_df["Fondo"] == fondo]["Serie"].unique())
+)
+
+
 
 precios_fondo_bmks_df = pd.merge(precios_fondos_df[fondo].reset_index(), precios_bmks_df[fondo2benchmark[fondo]["Benchmarks"]].reset_index(), on="Fecha")
 precios_fondo_bmks_df[fondo2benchmark[fondo]["Benchmarks"]] = precios_fondo_bmks_df[fondo2benchmark[fondo]["Benchmarks"]].shift(1)
