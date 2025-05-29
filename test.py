@@ -755,7 +755,8 @@ st.header("Rendimientos Dólares")
 
 precios_bmks_usd_df = precios_bmks_df.copy()
 precios_bmks_usd_df = precios_bmks_usd_df.div(precios_bmks_usd_df["Spot"], axis=0)
-st.write(precios_bmks_df["Spot"].shift(1))
+# st.write(precios_fondos_df.div(precios_bmks_df["Spot"].shift(1)))
+st.write(precios_fondos_df)
 
 st.header("Rendimientos Históricos VS Benchmark")
 
