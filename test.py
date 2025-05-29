@@ -772,7 +772,7 @@ rendimientos_usd_df *= 100
 rendimientos_usd_df = rendimientos_usd_df.round(decimals=2)
 
 fondos_rendimientos_dolares = [
-    "VECTCOB", "VECTPA", "VECTMIX", "VECTSIC", "COMMODQ", "VECTUSA", "MXRATES", "EQUITY", "NEXTGEN"
+    "VECTCOB", "VECTPA", "VECTMIX", "VECTSIC", "COMMODQ", "VECTUSA", "MXRATES", "EQUITY", "NEXTGEN", "VECTUSD"
 ]
 
 rendimientos_usd_df = rendimientos_usd_df.loc[fondos_rendimientos_dolares]
