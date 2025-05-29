@@ -755,8 +755,23 @@ st.header("Rendimientos Dólares")
 
 precios_bmks_usd_df = precios_bmks_df.copy()
 precios_bmks_usd_df = precios_bmks_usd_df.div(precios_bmks_usd_df["Spot"], axis=0)
-st.write(precios_fondos_df.div(precios_bmks_df["Spot"].shift(1), axis=0))
-#st.write(precios_fondos_df)
+precios_fondos_usd_df = precios_fondos_df.div(precios_bmks_df["Spot"].shift(1), axis=0)
+
+rendimientos_bmks_usd_df = formatea_rendimientos_bmk(fecha, precios_bmks_usd_df, fechas_habiles_iniciales_rf, fechas_habiles_iniciales_rv, propiedades_fondos_df, bmv_offset, fondo2benchmark)
+rendimientos_bmks_usd_df.reset_index(inplace=True)
+rendimientos_bmks_usd_df.rename(columns={"index":"Fondo"}|{col:f"BMK_{col}" for col in rendimientos_bmks_usd_df.columns if col != "index"}, inplace=True)
+
+rendimientos_fondos_usd_df = formatea_rendimientos_fondos(fecha, precios_fondos_usd_df, fechas_habiles_iniciales_rf, fechas_habiles_iniciales_rv, propiedades_fondos_df, tipo_calculo)
+rendimientos_fondos_usd_df.reset_index(inplace=True)
+rendimientos_fondos_usd_df.rename(columns={"index":"Fondo"}, inplace=True)
+
+rendimientos_usd_df = pd.merge(rendimientos_fondos_usd_df, rendimientos_bmks_usd_df, on="Fondo")
+rendimientos_usd_df = rendimientos_usd_df[["Fondo"] + sum([[col, f"BMK_{col}"] for col in fechas_exactas_iniciales_rf.keys()], [])]
+rendimientos_usd_df.set_index("Fondo", inplace=True)
+rendimientos_usd_df *= 100
+rendimientos_usd_df = rendimientos_usd_df.round(decimals=2)
+
+st.dataframe(rendimientos_usd_df.style.format("{:.2f}"), use_container_width=True)
 
 st.header("Rendimientos Históricos VS Benchmark")
 
