@@ -763,8 +763,17 @@ serie = st.selectbox(
     tuple(precios_fondos_MiVector_df[precios_fondos_MiVector_df["Fondo"] == fondo]["Serie"].unique())
 )
 
-st.write(precios_fondos_valmer_df[(precios_fondos_valmer_df["Fondo"] == fondo) & (precios_fondos_valmer_df["Serie"] == serie)])
-st.write(precios_fondos_MiVector_df[(precios_fondos_MiVector_df["Fondo"] == fondo) & (precios_fondos_MiVector_df["Serie"] == serie)])
+# st.write(precios_fondos_valmer_df[(precios_fondos_valmer_df["Fondo"] == fondo) & (precios_fondos_valmer_df["Serie"] == serie)])
+# st.write(precios_fondos_MiVector_df[(precios_fondos_MiVector_df["Fondo"] == fondo) & (precios_fondos_MiVector_df["Serie"] == serie)])
+temp_precios_fondo_bmks_df1 = precios_fondos_valmer_df[
+    (precios_fondos_valmer_df["Fondo"] == fondo) & (precios_fondos_valmer_df["Serie"] == serie)
+].copy()
+temp_precios_fondo_bmks_df2 = precios_fondos_MiVector_df[
+    (precios_fondos_MiVector_df["Fondo"] == fondo) & (precios_fondos_MiVector_df["Serie"] == serie)
+][["Fondo", "Serie", "Precio"]].copy()
+temp_precios_fondo_bmks_df = pd.concat([temp_precios_fondo_bmks_df1, temp_precios_fondo_bmks_df2], axis=0)
+
+st.write(temp_precios_fondo_bmks_df)
 
 precios_fondo_bmks_df = pd.merge(precios_fondos_df[fondo].reset_index(), precios_bmks_df[fondo2benchmark[fondo]["Benchmarks"]].reset_index(), on="Fecha")
 precios_fondo_bmks_df[fondo2benchmark[fondo]["Benchmarks"]] = precios_fondo_bmks_df[fondo2benchmark[fondo]["Benchmarks"]].shift(1)
