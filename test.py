@@ -751,6 +751,10 @@ except Exception as e:
     st.error(f"Error al generar el gráfico: {e}")
     st.error("Verifica que el DataFrame tenga la estructura correcta")
 
+st.header("Rendimientos Dólares")
+
+st.write("Ok")
+
 st.header("Rendimientos Históricos VS Benchmark")
 
 fondo = st.selectbox(
@@ -815,4 +819,3 @@ precios_indizados_fondo_bmks_df = precios_indizados_fondo_bmks_df[[fondo, "BMK"]
 
 precios_indizados_fondo_bmk_fig = visualiza_precios_indizados_fondo_bmk(precios_indizados_fondo_bmks_df)
 st.plotly_chart(precios_indizados_fondo_bmk_fig)
-
