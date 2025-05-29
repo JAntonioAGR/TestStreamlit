@@ -774,6 +774,7 @@ temp_precios_fondo_bmks_df2 = precios_fondos_MiVector_df[
 temp_precios_fondo_bmks_df = pd.concat([temp_precios_fondo_bmks_df1, temp_precios_fondo_bmks_df2], axis=0, ignore_index=True)
 temp_precios_fondo_bmks_df.rename(columns={"Precio":fondo}, inplace=True)
 
+st.write(temp_precios_fondo_bmks_df)
 st.write(precios_fondos_df[fondo].reset_index())
 
 precios_fondo_bmks_df = pd.merge(precios_fondos_df[fondo].reset_index(), precios_bmks_df[fondo2benchmark[fondo]["Benchmarks"]].reset_index(), on="Fecha")
