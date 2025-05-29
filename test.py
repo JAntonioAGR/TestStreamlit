@@ -773,6 +773,7 @@ temp_precios_fondo_bmks_df2 = precios_fondos_MiVector_df[
 ][["Fecha", "Fondo", "Serie", "Precio"]].copy()
 temp_precios_fondo_bmks_df = pd.concat([temp_precios_fondo_bmks_df1, temp_precios_fondo_bmks_df2], axis=0, ignore_index=True)
 temp_precios_fondo_bmks_df.rename(columns={"Precio":fondo}, inplace=True)
+temp_precios_fondo_bmks_df = temp_precios_fondo_bmks_df[["Fecha", fondo]]
 
 st.write(temp_precios_fondo_bmks_df)
 st.write(precios_fondos_df[fondo].reset_index())
