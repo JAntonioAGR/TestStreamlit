@@ -771,6 +771,12 @@ rendimientos_usd_df.set_index("Fondo", inplace=True)
 rendimientos_usd_df *= 100
 rendimientos_usd_df = rendimientos_usd_df.round(decimals=2)
 
+fondos_rendimientos_dolares = [
+    "VECTCOB", "VECTPA", "VECTMIX", "VECTSIC", "COMMODQ", "VECTUSA", "MXRATES", "EQUITY", "NEXTGEN"
+]
+
+rendimientos_usd_df = rendimientos_usd_df.loc[fondos_rendimientos_dolares]
+
 st.dataframe(rendimientos_usd_df.style.format("{:.2f}"), use_container_width=True)
 
 st.header("Rendimientos Históricos VS Benchmark")
