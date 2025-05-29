@@ -754,7 +754,7 @@ except Exception as e:
 st.header("Rendimientos Dólares")
 
 precios_bmks_usd_df = precios_bmks_df.copy()
-precios_bmks_usd_df = precios_bmks_usd_df.div(precios_bmks_usd_df["Spot"], axis=1)
+precios_bmks_usd_df = precios_bmks_usd_df.div(precios_bmks_usd_df["Spot"], axis=0)
 st.write(precios_bmks_usd_df.tail(50))
 
 st.header("Rendimientos Históricos VS Benchmark")
