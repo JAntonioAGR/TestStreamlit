@@ -654,6 +654,10 @@ precios_fondos_df = precios_fondos_df[
 
 fechas = [datetime.today()]
 temp_precios_fondos_df = descarga_rendimientos_MiVector(fechas)
+
+precios_fondos_MiVector_df = temp_precios_fondos_df.copy()
+st.write(precios_fondos_MiVector_df)
+
 temp_precios_fondos_df = temp_precios_fondos_df[
     pd.Series(list(zip(temp_precios_fondos_df["Fondo"], temp_precios_fondos_df["Serie"]))).isin(list(zip(propiedades_fondos_df["Fondo"], propiedades_fondos_df["Serie"])))
 ].reset_index(drop=True)
