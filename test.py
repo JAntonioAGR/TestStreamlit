@@ -193,8 +193,18 @@ def formatea_rendimientos_fondos(fecha, precios_fondos_df, fechas_habiles_inicia
         temp_rendimientos_df = calcula_rendimientos_fondos(precios_fondos_df, fondos, fecha, fechas_habiles_iniciales)
         temp_propiedades_fondos_df = propiedades_fondos_df[~propiedades_fondos_df["Serie"].isin(["XF0", "XF"])].copy()
         if temp_rendimientos_df.index.isin(temp_propiedades_fondos_df["Fondo"]).any():
-            temp_propiedades_fondos_df = temp_propiedades_fondos_df[temp_propiedades_fondos_df["Tipo"] == tipo]
+            temp_propiedades_fondos_df = temp_propiedades_fondos_df[
+                (temp_propiedades_fondos_df["Tipo"] == tipo) &
+                (~temp_propiedades_fondos_df["Fondo"].isin(["INCOME", "BALANCE", "DYNAMIC"]))
+            ]
             temp_rendimientos_brutos_df = calcula_rendimientos_brutos(temp_rendimientos_df, temp_propiedades_fondos_df, 0.005, fecha, fechas_habiles_iniciales_rf, fechas_habiles_iniciales_rv)
+            temp_rendimientos_df.loc[temp_propiedades_fondos_df["Fondo"]] = temp_rendimientos_brutos_df.copy()
+
+            temp_propiedades_fondos_df = temp_propiedades_fondos_df[
+                (temp_propiedades_fondos_df["Tipo"] == tipo) &
+                (temp_propiedades_fondos_df["Fondo"].isin(["INCOME", "BALANCE", "DYNAMIC"]))
+            ]
+            temp_rendimientos_brutos_df = calcula_rendimientos_brutos(temp_rendimientos_df, temp_propiedades_fondos_df, 0.005, fecha, fechas_habiles_iniciales_rf, fechas_habiles_iniciales_rv, tipo="Estrategicos")
             temp_rendimientos_df.loc[temp_propiedades_fondos_df["Fondo"]] = temp_rendimientos_brutos_df.copy()
 
         rendimientos_df = pd.concat([rendimientos_df, temp_rendimientos_df], axis=0)
@@ -281,9 +291,14 @@ def calcula_rendimientos_anualizados(rendimientos_df, fecha, fechas_habiles_inic
 
     return rendimientos_anualizados_df
 
-def calcula_rendimientos_brutos(rendimientos_df, propiedades_fondos_df, impuesto, fecha, fechas_habiles_iniciales_rf, fechas_habiles_iniciales_rv):
+def calcula_rendimientos_brutos(rendimientos_df, propiedades_fondos_df, impuesto, fecha, fechas_habiles_iniciales_rf, fechas_habiles_iniciales_rv, tipo="Deuda"):
     temp_df = propiedades_fondos_df.copy()
     temp_df[["Comision", "Factor RF"]] /= 100
+
+    # dias_transcurridos_ventanas_df = pd.DataFrame([
+    #         {ventana:1 if tipo != "Estrategicos" else (fecha - fechas_habiles_iniciales_rf[ventana]).days for ventana in fechas_habiles_iniciales_rf}|{"Tipo":"RF"},
+    #         {ventana:1 if tipo != "Estrategicos" else (fecha - fechas_habiles_iniciales_rv[ventana]).days for ventana in fechas_habiles_iniciales_rv}|{"Tipo":"RV"}
+    # ])
 
     dias_transcurridos_ventanas_df = pd.DataFrame([
             {ventana:(fecha - fechas_habiles_iniciales_rf[ventana]).days for ventana in fechas_habiles_iniciales_rf}|{"Tipo":"RF"},
@@ -295,15 +310,20 @@ def calcula_rendimientos_brutos(rendimientos_df, propiedades_fondos_df, impuesto
     temp_df.index.name = None
 
     comisiones_srs = temp_df["Comision"]
-    ajustes_comision_srs = (comisiones_srs * 1.16)/ 360
+    # ajustes_comision_srs = (comisiones_srs * 1.16) / (1 if tipo != "Estrategicos" else 360)
+    ajustes_comision_srs = (comisiones_srs * 1.16) / 360
     ajustes_comision_df = temp_df[list(fechas_habiles_iniciales_rf.keys())].multiply(ajustes_comision_srs, axis=0)
 
     factores_rf_srs = temp_df["Factor RF"]
-    ajustes_impuesto_srs = (factores_rf_srs * impuesto)/360
+    # ajustes_impuesto_srs = (factores_rf_srs * impuesto) / (1 if tipo != "Estrategicos" else 360)
+    ajustes_impuesto_srs = (factores_rf_srs * impuesto) / 360
     ajustes_impuesto_df = temp_df[list(fechas_habiles_iniciales_rf.keys())].multiply(ajustes_impuesto_srs, axis=0)
 
     rendimientos_brutos_df = rendimientos_df.loc[temp_df.index.tolist()].copy()
-    rendimientos_brutos_df = (1 + rendimientos_brutos_df)/(1 - ajustes_comision_df) + ajustes_impuesto_df - 1
+    if tipo != "Estrategicos":
+        rendimientos_brutos_df = rendimientos_brutos_df + ajustes_comision_df + ajustes_impuesto_df
+    else:
+        rendimientos_brutos_df = (1 + rendimientos_brutos_df)/(1 - ajustes_comision_df) + ajustes_impuesto_df - 1
 
     return rendimientos_brutos_df
 
@@ -622,7 +642,7 @@ st.header("Rendimientos Brutos")
 
 tipo_calculo = st.radio(
     "Seleccione las series con las que desea calcular los rendimientos:",
-    ["XF", "FD"], horizontal=True
+    ["XF", "FD", "CONFERENCE"], horizontal=True
 )
 
 propiedades_fondos_df = propiedades_fondos_df[propiedades_fondos_df["TipoCalculo"] == tipo_calculo]
