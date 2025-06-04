@@ -20,7 +20,7 @@ from selenium.webdriver.common.by import By
 # import general_function.general_func as gf
 
 def formatea_precios_yahoo(bmks_rv, fecha):
-    precios_bmks_yahoo_df = yf.download(bmks_rv, start=datetime(year=fecha.year - 1, month=1, day=1).strftime("%Y-%m-%d"))
+    precios_bmks_yahoo_df = yf.download(bmks_rv, start=datetime(year=fecha.year - 3, month=1, day=1).strftime("%Y-%m-%d"))
     precios_bmks_yahoo_df = precios_bmks_yahoo_df.xs(key="Close", axis=1, level=0)
     precios_bmks_yahoo_df.reset_index(inplace=True)
     precios_bmks_yahoo_df.rename(columns={"Date":"Fecha", "^MXX":"IPC", "^SPESG":"SPESG_USD", "^SPGSCI":"SPGSCI_USD", "^GSPC":"S&P_USD", "^NDX":"NDX_USD"}, inplace=True)
