@@ -841,5 +841,7 @@ precios_indizados_fondo_bmks_df = precios_indizados_fondo_bmks_df.div(precios_in
 precios_indizados_fondo_bmks_df["BMK"] = (precios_indizados_fondo_bmks_df[fondo2benchmark[fondo]["Benchmarks"]] * fondo2benchmark[fondo]["Pesos"]).sum(axis=1)
 precios_indizados_fondo_bmks_df = precios_indizados_fondo_bmks_df[[fondo, "BMK"]]
 
+st.write(precios_indizados_fondo_bmks_df)
+
 precios_indizados_fondo_bmk_fig = visualiza_precios_indizados_fondo_bmk(precios_indizados_fondo_bmks_df)
 st.plotly_chart(precios_indizados_fondo_bmk_fig)
