@@ -469,12 +469,12 @@ def visualiza_precios_indizados_fondo_bmk(precios_indizados_fondo_bmks_df):
     precios_indizados_fondo_bmks_df_vis = precios_indizados_fondo_bmks_df.copy()
     precios_indizados_fondo_bmks_df_vis *= 100
     precios_indizados_fondo_bmks_df_vis.reset_index(inplace=True)
-    precios_indizados_fondo_bmks_df_vis = precios_indizados_fondo_bmks_df_vis.melt(id_vars="Fecha", value_name="Rendimiento (%)", var_name="Portafolio")
+    precios_indizados_fondo_bmks_df_vis = precios_indizados_fondo_bmks_df_vis.melt(id_vars="Fecha", value_name="Precio Indizado", var_name="Portafolio")
 
     # st.write(precios_indizados_fondo_bmks_df_vis)
 
     fig = go.Figure()
-    temp_fig = px.line(precios_indizados_fondo_bmks_df_vis, x="Fecha", y="Rendimiento (%)", color="Portafolio")
+    temp_fig = px.line(precios_indizados_fondo_bmks_df_vis, x="Fecha", y="Precio Indizado", color="Portafolio")
     for data in temp_fig["data"]:
         data["line"]["color"] = "white" if data["legendgroup"] == "BMK" else "#EC5E2A"
         data["line"]["width"] = 2
