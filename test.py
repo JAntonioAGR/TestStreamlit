@@ -837,7 +837,7 @@ precios_indizados_fondo_bmks_df = precios_fondo_bmks_df.loc[
     (precios_fondo_bmks_df.index >= fecha_inicial_grafica_rendimientos_historicos) &
     (precios_fondo_bmks_df.index <= fecha_final_grafica_rendimientos_historicos)
 ]
-precios_indizados_fondo_bmks_df = precios_indizados_fondo_bmks_df.div(precios_indizados_fondo_bmks_df.loc[fecha_inicial_grafica_rendimientos_historicos], axis=1) - 1
+precios_indizados_fondo_bmks_df = precios_indizados_fondo_bmks_df.div(precios_indizados_fondo_bmks_df.loc[fecha_inicial_grafica_rendimientos_historicos], axis=1) * 100
 precios_indizados_fondo_bmks_df["BMK"] = (precios_indizados_fondo_bmks_df[fondo2benchmark[fondo]["Benchmarks"]] * fondo2benchmark[fondo]["Pesos"]).sum(axis=1)
 precios_indizados_fondo_bmks_df = precios_indizados_fondo_bmks_df[[fondo, "BMK"]]
 
