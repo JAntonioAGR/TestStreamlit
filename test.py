@@ -479,7 +479,7 @@ def visualiza_precios_indizados_fondo_bmk(precios_indizados_fondo_bmks_df):
         data["line"]["color"] = "white" if data["legendgroup"] == "BMK" else "#EC5E2A"
         data["line"]["width"] = 2
         
-        fig.add_trace(go.Scattergl(data))
+        fig.add_trace(go.Scatter(data))
 
     fig.update_xaxes(showgrid=True, linecolor='white', tickangle=90, tickfont=dict(size=15, color="white"), linewidth=4, mirror=True, title=None)
     fig.update_yaxes(showgrid=True, gridcolor='#44475A', linecolor='white', tickfont=dict(size=17, color="white"), title=dict(text='Rendimiento (%)', font=dict(size=30, color='white')),  linewidth=4, mirror=True)
