@@ -846,7 +846,6 @@ st.plotly_chart(precios_indizados_fondo_bmk_fig)
 
 buffer = io.BytesIO()
 with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
-    writer = pd.ExcelWriter("Test.xlsx", engine='xlsxwriter', datetime_format='YYYY-MM-DD')
     precios_indizados_fondo_bmks_df.to_excel(writer, sheet_name=f"{fondo}_{serie}")
 
     fondo_bmks_df = pd.DataFrame(fondo2benchmark[fondo])
