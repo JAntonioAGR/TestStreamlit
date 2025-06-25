@@ -841,7 +841,89 @@ precios_indizados_fondo_bmks_df = precios_indizados_fondo_bmks_df.div(precios_in
 precios_indizados_fondo_bmks_df["BMK"] = (precios_indizados_fondo_bmks_df[fondo2benchmark[fondo]["Benchmarks"]] * fondo2benchmark[fondo]["Pesos"]).sum(axis=1)
 precios_indizados_fondo_bmks_df = precios_indizados_fondo_bmks_df[[fondo, "BMK"]] + 1
 
-st.write(precios_indizados_fondo_bmks_df)
-
 precios_indizados_fondo_bmk_fig = visualiza_precios_indizados_fondo_bmk(precios_indizados_fondo_bmks_df)
 st.plotly_chart(precios_indizados_fondo_bmk_fig)
+
+buffer = io.BytesIO()
+with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+    writer = pd.ExcelWriter("Test.xlsx", engine='xlsxwriter', datetime_format='YYYY-MM-DD')
+    precios_indizados_fondo_bmks_df.to_excel(writer, sheet_name=f"{fondo}_{serie}")
+
+    fondo_bmks_df = pd.DataFrame(fondo2benchmark[fondo])
+    fondo_bmks_df.set_index("Benchmarks", inplace=True)
+    fondo_bmks_df.to_excel(writer, sheet_name=f"{fondo}_{serie}", startcol=4)
+
+    workbook = writer.book
+    worksheet  = writer.sheets[f"{fondo}_{serie}"]
+
+    worksheet.set_column(0, 2, 15)
+    column_length = max(fondo_bmks_df.index.astype(str).map(len).max(), len(fondo_bmks_df.index.name))
+    worksheet.set_column(4, 4, column_length)
+
+    precios_indizados_format = workbook.add_format({
+        "num_format": "#,##0.00",
+        "align":"center",
+        "border":1
+    })
+    worksheet.write_column(row=1, col=1, data=precios_indizados_fondo_bmks_df[fondo], cell_format=precios_indizados_format)
+    worksheet.write_column(row=1, col=2, data=precios_indizados_fondo_bmks_df["BMK"], cell_format=precios_indizados_format)
+
+    encabezados_indices_format = workbook.add_format({
+        "num_format":"YYYY-MM-DD",
+        "bold":1,
+        "align":"center",
+        "border":1,
+        "bg_color":"#EC5E2A",
+        "font_color":"white"
+    })
+    worksheet.write_row(row=0, col=1, data=precios_indizados_fondo_bmks_df.columns, cell_format=encabezados_indices_format)
+    worksheet.write(0, 0, precios_indizados_fondo_bmks_df.index.name, encabezados_indices_format)
+    worksheet.write_column(row=1, col=0, data=precios_indizados_fondo_bmks_df.index, cell_format=encabezados_indices_format)
+
+    encabezados_indices_format = workbook.add_format({
+        "num_format":"YYYY-MM-DD",
+        "bold":1,
+        "align":"center",
+        "border":1,
+        "bg_color":"#1A3A6C",
+        "font_color":"white"
+    })
+    worksheet.write_row(row=0, col=5, data=fondo_bmks_df.columns, cell_format=encabezados_indices_format)
+    worksheet.write(0, 4, fondo_bmks_df.index.name, encabezados_indices_format)
+    worksheet.write_column(row=1, col=4, data=fondo_bmks_df.index, cell_format=encabezados_indices_format)
+
+    porcentaje_format = workbook.add_format({
+        "num_format":"0.00%",
+        "align":"center",
+        "border":1
+    })
+    worksheet.write_column(row=1, col=5, data=fondo_bmks_df["Pesos"], cell_format=porcentaje_format)
+
+    chart = workbook.add_chart({'type': 'line'})
+    chart.add_series({
+        'values': f'={fondo}_{serie}!$B{2}:$B{2 + len(precios_indizados_fondo_bmks_df)}',
+        'categories': f'={fondo}_{serie}!$A${2}:$A${2 + len(precios_indizados_fondo_bmks_df)}',
+        'name': f'{fondo}',
+        'line':{'color':"#EC5E2A"}
+    })
+    chart.add_series({
+        'values': f'={fondo}_{serie}!$C{2}:$C{2 + len(precios_indizados_fondo_bmks_df)}',
+        'categories': f'={fondo}_{serie}!$A${2}:$A${2 + len(precios_indizados_fondo_bmks_df)}',
+        'name': 'BMK',
+        'line':{'color':"#1A3A6C"}
+    })
+    chart.set_x_axis({'num_format': 'YYYY-MM-DD'})
+    chart.set_title({'name': f'{fondo} {serie} vs BMK'})
+    chart.set_size({'x_scale': 2, 'y_scale': 2})
+    worksheet.insert_chart(row=len(fondo_bmks_df) + 2, col=4, chart=chart)
+
+    worksheet.hide_gridlines(2)
+
+    writer.close()
+
+download2 = st.download_button(
+    label="Exportar Gráfico a Excel",
+    data=buffer,
+    file_name=f'{fondo}_{serie}.xlsx',
+    mime='application/vnd.ms-excel'
+)
