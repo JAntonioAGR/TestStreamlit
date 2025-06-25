@@ -5,3 +5,4 @@ selenium
 lxml
 Authlib
 plotly
+xlsxwriter
