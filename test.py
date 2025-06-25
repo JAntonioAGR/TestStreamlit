@@ -846,7 +846,9 @@ st.plotly_chart(precios_indizados_fondo_bmk_fig)
 
 buffer = io.BytesIO()
 with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
-    precios_indizados_fondo_bmks_df.to_excel(writer, sheet_name=f"{fondo}_{serie}")
+    precios_indizados_df = precios_indizados_fondo_bmks_df.copy()
+    precios_indizados_df *= 100
+    precios_indizados_df.to_excel(writer, sheet_name=f"{fondo}_{serie}")
 
     fondo_bmks_df = pd.DataFrame(fondo2benchmark[fondo])
     fondo_bmks_df.set_index("Benchmarks", inplace=True)
@@ -864,8 +866,8 @@ with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
         "align":"center",
         "border":1
     })
-    worksheet.write_column(row=1, col=1, data=precios_indizados_fondo_bmks_df[fondo], cell_format=precios_indizados_format)
-    worksheet.write_column(row=1, col=2, data=precios_indizados_fondo_bmks_df["BMK"], cell_format=precios_indizados_format)
+    worksheet.write_column(row=1, col=1, data=precios_indizados_df[fondo], cell_format=precios_indizados_format)
+    worksheet.write_column(row=1, col=2, data=precios_indizados_df["BMK"], cell_format=precios_indizados_format)
 
     encabezados_indices_format = workbook.add_format({
         "num_format":"YYYY-MM-DD",
@@ -875,9 +877,9 @@ with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
         "bg_color":"#EC5E2A",
         "font_color":"white"
     })
-    worksheet.write_row(row=0, col=1, data=precios_indizados_fondo_bmks_df.columns, cell_format=encabezados_indices_format)
-    worksheet.write(0, 0, precios_indizados_fondo_bmks_df.index.name, encabezados_indices_format)
-    worksheet.write_column(row=1, col=0, data=precios_indizados_fondo_bmks_df.index, cell_format=encabezados_indices_format)
+    worksheet.write_row(row=0, col=1, data=precios_indizados_df.columns, cell_format=encabezados_indices_format)
+    worksheet.write(0, 0, precios_indizados_df.index.name, encabezados_indices_format)
+    worksheet.write_column(row=1, col=0, data=precios_indizados_df.index, cell_format=encabezados_indices_format)
 
     encabezados_indices_format = workbook.add_format({
         "num_format":"YYYY-MM-DD",
@@ -900,14 +902,14 @@ with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
 
     chart = workbook.add_chart({'type': 'line'})
     chart.add_series({
-        'values': f'={fondo}_{serie}!$B{2}:$B{2 + len(precios_indizados_fondo_bmks_df)}',
-        'categories': f'={fondo}_{serie}!$A${2}:$A${2 + len(precios_indizados_fondo_bmks_df)}',
+        'values': f'={fondo}_{serie}!$B{2}:$B{2 + len(precios_indizados_df)}',
+        'categories': f'={fondo}_{serie}!$A${2}:$A${2 + len(precios_indizados_df)}',
         'name': f'{fondo}',
         'line':{'color':"#EC5E2A"}
     })
     chart.add_series({
-        'values': f'={fondo}_{serie}!$C{2}:$C{2 + len(precios_indizados_fondo_bmks_df)}',
-        'categories': f'={fondo}_{serie}!$A${2}:$A${2 + len(precios_indizados_fondo_bmks_df)}',
+        'values': f'={fondo}_{serie}!$C{2}:$C{2 + len(precios_indizados_df)}',
+        'categories': f'={fondo}_{serie}!$A${2}:$A${2 + len(precios_indizados_df)}',
         'name': 'BMK',
         'line':{'color':"#1A3A6C"}
     })
